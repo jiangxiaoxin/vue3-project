@@ -28,6 +28,10 @@ const routes = [
   {
     to: '/scoped',
     title: 'scoped样式测试'
+  },
+  {
+    to: '/tsx',
+    title: 'tsx组件'
   }
 ]
 

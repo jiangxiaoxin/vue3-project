@@ -45,6 +45,11 @@ const router = createRouter({
       path: '/scoped',
       name: 'scoped',
       component: () => import('@/views/scoped/index.vue')
+    },
+    {
+      path: '/tsx',
+      name: 'tsx组件',
+      component: () => import('@/views/writeTsx/index.vue')
     }
   ]
 })
