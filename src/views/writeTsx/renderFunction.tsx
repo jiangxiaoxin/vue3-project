@@ -17,6 +17,7 @@ export default defineComponent({
             randomValue
         }
     },
+    
     render() {
         return <div v-container>
             <p>value: {this.value}</p>
