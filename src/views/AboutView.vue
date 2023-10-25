@@ -1,5 +1,6 @@
 <template>
   <div class="about" v-container>
+    <scrollView />
     <h1>This is an about page</h1>
     <el-button @click="clickBtn" v-first>123</el-button>
     <p>global msg: {{ globalMsg }}</p>
@@ -12,7 +13,7 @@
 <script setup lang="ts">
 import { inject, provide, ref } from 'vue'
 import ProvideInject from './provideinject.vue'
-
+import scrollView from './scrollView.vue'
 const globalMsg = inject('globalMsg')
 
 provide('pfoo', 'pfoo')

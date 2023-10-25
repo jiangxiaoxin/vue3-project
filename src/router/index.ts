@@ -48,8 +48,13 @@ const router = createRouter({
     },
     {
       path: '/tsx',
-      name: 'tsx组件',
+      name: 'tsx',
       component: () => import('@/views/writeTsx/index.vue')
+    },
+    {
+      path: '/scroll',
+      name: 'scroll',
+      component: () => import('@/views/scroll/index.vue')
     }
   ]
 })

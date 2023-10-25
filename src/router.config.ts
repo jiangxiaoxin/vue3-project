@@ -32,6 +32,10 @@ const routes = [
   {
     to: '/tsx',
     title: 'tsx组件'
+  },
+  {
+    to: '/scroll',
+    title: 'scroll组件'
   }
 ]
 
