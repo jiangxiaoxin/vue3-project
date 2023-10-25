@@ -36,6 +36,10 @@ const routes = [
   {
     to: '/scroll',
     title: 'scroll组件'
+  },
+  {
+    to: '/ref',
+    title: '测试ref'
   }
 ]
 

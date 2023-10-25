@@ -55,6 +55,11 @@ const router = createRouter({
       path: '/scroll',
       name: 'scroll',
       component: () => import('@/views/scroll/index.vue')
+    },
+    {
+      path: '/ref',
+      name: 'ref',
+      component: () => import('@/views/ref和reactive/ref')
     }
   ]
 })
