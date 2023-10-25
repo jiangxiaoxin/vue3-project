@@ -60,6 +60,11 @@ const router = createRouter({
       path: '/ref',
       name: 'ref',
       component: () => import('@/views/ref和reactive/ref')
+    },
+    {
+      path: '/reactive',
+      name: 'reactive',
+      component: () => import('@/views/ref和reactive/reactive')
     }
   ]
 })

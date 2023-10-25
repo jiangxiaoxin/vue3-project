@@ -40,6 +40,10 @@ const routes = [
   {
     to: '/ref',
     title: '测试ref'
+  },
+  {
+    to: '/reactive',
+    title: '测试reactive'
   }
 ]
 

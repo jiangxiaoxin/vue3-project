@@ -8,11 +8,14 @@
     <el-dialog v-model="open" title="dialog" ref="dialogRef" @open="opencb" @opened="openedcn">
       <p>content</p>
     </el-dialog>
+
+    <button @click="showMessage">message</button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const open = ref(false)
 
@@ -33,5 +36,12 @@ const opencb = () => {
 
 const openedcn = () => {
   console.log('dialog opened')
+}
+
+const showMessage = () => {
+  ElMessage.success({
+    message: null,
+    duration: 2000
+  })
 }
 </script>

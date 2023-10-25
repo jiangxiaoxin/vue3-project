@@ -1,5 +1,4 @@
-import {defineComponent, onMounted, ref} from "vue"
-
+import {defineComponent, onMounted, ref, reactive} from "vue"
 export default defineComponent({
     setup() {
         const arr = ref<number[]>([])
@@ -42,17 +41,23 @@ export default defineComponent({
             }
         }
 
+        const state = reactive({
+            name: 'state'
+        })
+
         return {
             arr,
             obj,
             handleArr,
-            handleObj
+            handleObj,
+            state
         }
     },
 
     render() {
         const {handleArr} = this
         return <div>
+            <h1>{this.state.name}</h1>
             <p>常用的数据类型就是各种基础类型，数组，对象。</p>
             <p>基础类型数据不用讲，该怎么用怎么用</p>
             <p>数组最重要是 arr.value = [] 后，仍然保持响应式。这其实是把 arr这个ref要引用的数组整体换了一个</p>
@@ -102,6 +107,8 @@ export default defineComponent({
                     }
                 </ul>
             </div>
+
+            
         </div>
     }
 })
