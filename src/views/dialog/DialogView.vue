@@ -10,12 +10,27 @@
     </el-dialog>
 
     <button @click="showMessage">message</button>
+
+    <button @click="showMyMsg">my msg</button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { createModule } from '../../../文档/动态渲染组件/message'
+
+const showMyMsg = () => {
+  // 创建和渲染组件
+  const mod = createModule()
+
+  // 挂载渲染组件
+  mod.open()
+
+  setTimeout(() => {
+    mod.close()
+  }, 2000)
+}
 
 const open = ref(false)
 
