@@ -1,6 +1,8 @@
+slot
+
 定义props
 
-slot
+
 
 vue router 的常见使用
 
