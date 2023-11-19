@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createModule } from '../../../文档/动态渲染组件/message'
+import { createModule } from '../../../docs/动态渲染组件/message'
 
 const showMyMsg = () => {
   // 创建和渲染组件
@@ -60,3 +60,4 @@ const showMessage = () => {
   })
 }
 </script>
+../../../docs/动态渲染组件/message
