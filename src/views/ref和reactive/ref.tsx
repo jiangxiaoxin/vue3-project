@@ -83,6 +83,7 @@ export default defineComponent({
                 <button onClick={() => this.handleObj('add prop')}>add prop</button>
                 <button onClick={() => this.handleObj('change prop')}>change prop</button>
                 <button onClick={() => this.handleObj('delete prop')}>delete prop</button>
+                <button >整体替换obj.value</button>
                 <ul>
                     {
                         Object.keys(this.obj).map(key => {

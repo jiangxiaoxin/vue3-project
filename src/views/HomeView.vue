@@ -3,6 +3,7 @@ import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
+  <glo />
   <main>
     <TheWelcome />
   </main>

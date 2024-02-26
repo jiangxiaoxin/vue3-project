@@ -8,6 +8,7 @@ import router from './router'
 import directives from './directives'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import GlobalVue from './components/Global.vue'
 
 import { useZIndex } from 'element-plus'
 
@@ -20,6 +21,8 @@ const zindex = useZIndex()
 // )
 
 const app = createApp(App)
+
+app.component('glo', GlobalVue)
 
 const pinia = createPinia()
 // console.log('🚀 ~ file: main.ts:13 ~ pinia:', pinia)

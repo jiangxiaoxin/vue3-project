@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import routes from '@/router/router.config'
+// import routes from '@/router/router.config'
+import { config as routes } from '@/router/index'
 </script>
 
 <template>
@@ -16,8 +17,8 @@ import routes from '@/router/router.config'
         <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/directives">指令</RouterLink> -->
 
-        <RouterLink v-for="route in routes" :key="route.to" :to="route.to">{{
-          route.title
+        <RouterLink v-for="route in routes" :key="route.path" :to="route.path">{{
+          route.name
         }}</RouterLink>
       </nav>
     </div>

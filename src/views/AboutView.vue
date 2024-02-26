@@ -1,5 +1,10 @@
 <template>
   <div class="about" v-container>
+    <div>
+      parent
+      <div>child</div>
+    </div>
+
     <scrollView />
     <h1>This is an about page</h1>
     <el-button @click="clickBtn" v-first>123</el-button>
