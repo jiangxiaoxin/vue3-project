@@ -22,6 +22,7 @@ import { config as routes } from '@/router/index'
         }}</RouterLink>
       </nav>
     </div>
+    <!-- app 下有个根的router-view，那 router里 / 根路径配置的组件，就会在这个根的 router-view里 -->
     <RouterView />
   </header>
 </template>

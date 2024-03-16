@@ -87,8 +87,17 @@ export const config = [
   {
     path: '/tinyforest',
     name: 'tinyforest',
-    component: () => import("@/views/tinyforest/index.vue")
-
+    component: () => import('@/views/tinyforest/index.vue')
+  },
+  {
+    path: '/vuex/demo1',
+    name: 'vuex-demo1',
+    component: () => import('../views/vuex/demo1/index.vue')
+  },
+  {
+    path: '/vuex/demo2',
+    name: 'vuex-demo2',
+    component: () => import('../views/vuex/demo1/main.vue')
   }
 ]
 

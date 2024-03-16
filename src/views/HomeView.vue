@@ -4,9 +4,9 @@ import TheWelcome from '../components/TheWelcome.vue'
 
 <template>
   <glo />
-  <main>
+  <!-- <main>
     <TheWelcome />
-  </main>
+  </main> -->
   <div class="router-view-cls">
     <RouterView />
   </div>
