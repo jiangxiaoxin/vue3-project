@@ -1,11 +1,11 @@
 import type {DirectiveBinding} from "vue"
 // 简单的copy封装，这样需要copy功能的地方就不需要重复构建 copy 那部分功能了
 const copy =  {
-    mounted: (el: HTMLElement, binding: DirectiveBinding) => {
+    mounted: (el: any, binding: DirectiveBinding) => {
         el.dataset.copyContent = binding.value
 
         // 这里通过el添加动态属性其实并不是建议的方式。但为了在卸载时能去掉这些监听事件，只能通过它作为中间桥梁
-        el.$copy = () => {
+        el['$copy'] = () => {
             const textarea = document.createElement('textarea')
             textarea.readOnly = true
             textarea.style.position = 'absolute'
@@ -30,7 +30,7 @@ const copy =  {
     },
     beforeUnmount: (el: HTMLElement) => {
         delete el.dataset.copyContent
-        el.removeEventListener('click', el.$copy)
+        el.removeEventListener('click', el['$copy'])
     }
 }
 

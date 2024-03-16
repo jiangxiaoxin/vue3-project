@@ -1,6 +1,9 @@
-import {defineComponent, onMounted, ref, reactive} from "vue"
+import {defineComponent, onMounted, ref, reactive, nextTick} from "vue"
 export default defineComponent({
     setup() {
+
+        // nextTick()
+
         const arr = ref<number[]>([])
 
         const obj = ref<Record<string, any>>({

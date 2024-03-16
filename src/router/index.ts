@@ -78,6 +78,17 @@ export const config = [
     path: '/reac',
     name: 'reactivity',
     component: () => import('@/views/ref和reactive/reactivity.vue')
+  },
+  {
+    path: '/css',
+    name: 'css',
+    component: () => import('@/views/css/index.vue')
+  },
+  {
+    path: '/tinyforest',
+    name: 'tinyforest',
+    component: () => import("@/views/tinyforest/index.vue")
+
   }
 ]
 

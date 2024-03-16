@@ -9,6 +9,10 @@ import directives from './directives'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import GlobalVue from './components/Global.vue'
+import * as config from "./config"
+console.log(config.foo)
+console.log(config.setfoo())
+console.log(config.foo)
 
 import { useZIndex } from 'element-plus'
 
@@ -46,7 +50,7 @@ app.directive('addCls', (el: HTMLElement, binding) => {
 })
 
 Object.keys(directives).forEach((directiveKey) => {
-  app.directive(directiveKey, directives[directiveKey])
+  app.directive(directiveKey, directives[directiveKey] as any)
 })
 
 app.provide('globalMsg', 'hello-world')
