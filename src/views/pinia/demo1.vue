@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { useCounterStore } from '@/stores/counter'
 import { getActivePinia } from 'pinia'
-import { isReactive, isRef, ref, inject } from 'vue'
+import { isReactive, isRef, ref, inject, isProxy } from 'vue'
 
 const time = ref(Date.now())
 const changeTime = () => {
@@ -21,8 +21,15 @@ const changeTime = () => {
 }
 
 const store = useCounterStore()
+console.log('🚀 ~ store:', store)
 
-console.log('count', store, store.count, isRef(store.count), isReactive(store.count))
+console.log(
+  'store.count',
+  store.count,
+  isRef(store.count),
+  isReactive(store.count),
+  isProxy(store.count)
+)
 
 const pinia = getActivePinia()
 console.log('pinia', pinia)

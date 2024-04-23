@@ -6,15 +6,20 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import directives from './directives'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+// import ElementPlus from 'element-plus'
+// import 'element-plus/dist/index.css'
 import GlobalVue from './components/Global.vue'
-import * as config from "./config"
+import * as config from './config'
 console.log(config.foo)
 console.log(config.setfoo())
 console.log(config.foo)
 
 import { useZIndex } from 'element-plus'
+import Antd from 'ant-design-vue'
+import 'ant-design-vue/dist/reset.css'
+
+import VXETable from 'vxe-table'
+import 'vxe-table/lib/style.css'
 
 const zindex = useZIndex()
 // console.log(
@@ -55,6 +60,8 @@ Object.keys(directives).forEach((directiveKey) => {
 
 app.provide('globalMsg', 'hello-world')
 
-app.use(ElementPlus)
+// app.use(ElementPlus)
+app.use(Antd)
+app.use(VXETable)
 
 app.mount('#app')

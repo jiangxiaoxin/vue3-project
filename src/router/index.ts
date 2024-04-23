@@ -4,12 +4,30 @@ import DirectivesView from '@/views/DirectivesView.vue'
 import BlankView from '@/views/Blank.vue'
 import PiniaView from '@/views/pinia/index.vue'
 import DialogView from '@/views/dialog/DialogView.vue'
+import { defineAsyncComponent } from 'vue'
+import component from 'element-plus/es/components/tree-select/src/tree-select-option.mjs'
 
 export const config = [
+  // {
+  //   path: '/',
+  //   name: 'home',
+  //   component: HomeView
+  // },
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: BlankView
+    // redirect: '/about'
+    // redirect: '/home/index',
+    // children: [
+    //   {
+    //     path: '/home/index',
+    //     name: 'homex',
+    //     // component: defineAsyncComponent(() => import('@/views/HomeX.vue'))
+    //     component: () => import('@/views/HomeX.vue')
+    //     // component: () => import('../views/AboutView.vue')
+    //   }
+    // ]
   },
   {
     path: '/about',
@@ -98,6 +116,41 @@ export const config = [
     path: '/vuex/demo2',
     name: 'vuex-demo2',
     component: () => import('../views/vuex/demo1/main.vue')
+  },
+  {
+    path: '/keepalive',
+    name: 'keepalive',
+    component: () => import('../views/keepAlive/index.vue')
+  },
+  {
+    path: '/antd',
+    name: 'antd',
+    component: () => import('../views/antd/form.vue')
+  },
+  {
+    path: '/flex',
+    name: 'flex',
+    component: () => import('../views/flex/index.vue')
+  },
+  {
+    path: '/vxe',
+    name: 'vxe',
+    component: () => import('../views/vxe/index.vue')
+  },
+  {
+    path: '/event',
+    name: 'event',
+    component: () => import('../views/eventlistener/index.vue')
+  },
+  {
+    path: '/native',
+    name: 'native',
+    component: () => import('../views/nativeDom/index.vue')
+  },
+  {
+    path: '/table',
+    name: 'table',
+    component: () => import('../views/template/table.vue')
   }
 ]
 

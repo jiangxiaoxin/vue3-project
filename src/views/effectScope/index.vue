@@ -13,13 +13,17 @@ const changeFoo = () => {
   foo.value = Date.now()
 }
 
+watchEffect(() => {
+  console.log('--watcheffect foo', foo.value)
+})
+
 const scope = new EffectScope()
 const res = scope.run(() => {
   watch(foo, () => {
-    console.log('scope watch,foo', foo)
+    console.log('scope watch,foo', foo.value)
   })
   watchEffect(() => {
-    console.log('watch effect,foo', foo)
+    console.log('scope watch effect,foo', foo.value)
   })
   const time = computed(() => {
     return new Date(foo.value)

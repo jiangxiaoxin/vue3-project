@@ -1,33 +1,99 @@
+<template>
+  <div class="app-rooter">
+    <RouterView class="router-view-in-app" />
+  </div>
+</template>
+
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { onMounted, ref, computed, watch } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
 // import routes from '@/router/router.config'
 import { config as routes } from '@/router/index'
+import AddRouteVue from '@/views/oneRoute/addRoute.vue'
+import ModalProps from '@/views/vxe/modalprops.vue'
+import ModalRef from '@/views/vxe/modalref.vue'
+
+// defineOptions({
+//   name: 'VueProjectApp'
+// })
+
+const modalRef = ref<any>(null)
+const openModal = () => {
+  modalRef.value?.openModal()
+}
+
+const timer = ref(Date.now())
+const show = ref(false)
+const toggleVisible = () => {
+  show.value = !show.value
+  // timer.value = Date.now()
+}
+
+const customUpdate = (val: boolean) => {
+  console.log('自定义的update监听', val)
+  // show.value = val
+}
+
+watch(show, (newVal, oldVal) => {
+  console.log('🚀 ~ parent watch ~ show:', newVal, oldVal)
+})
+
+const __msg = ref('123')
+
+const msg = computed({
+  get() {
+    return __msg.value
+  },
+  set(value) {
+    console.log('🚀 ~ set ~ value:', value)
+
+    if (value.length > 5) {
+      __msg.value = value.slice(0, 5)
+    } else {
+      __msg.value = value
+    }
+  }
+})
+
+console.log('普通的log===')
+onMounted(() => {
+  console.log('onMounted===', msg)
+})
+
+const showCookie = () => {
+  console.log('cookie:', document.cookie)
+}
+
+const clearCookie = () => {
+  throw new Error('123')
+  let cookieKeys = document.cookie.match(/[^ =;]+(?=\=)/g)!
+
+  // const cookie = cookieKeys
+  //   ?.map((key) => {
+  //     return key + '=0;expires=' + new Date(0).toUTCString()
+  //   })
+  //   .join(';')!
+
+  // console.log(cookie)
+
+  document.cookie = cookieKeys[0] + '=0;expires=' + new Date(0).toUTCString()
+
+  // if (cookieKeys) {
+  //   for (var i = cookieKeys.length; i--; ) {
+  //     document.cookie = cookieKeys[i] + '=0;expires=' + new Date(0).toUTCString()
+  //   }
+  // }
+}
 </script>
 
-<template>
-  <header>
-    <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
-
-    <div class="wrapper">
-      <!-- <HelloWorld msg="You did it!" /> -->
-
-      <nav>
-        <!-- <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-        <RouterLink to="/directives">指令</RouterLink> -->
-
-        <RouterLink v-for="route in routes" :key="route.path" :to="route.path">{{
-          route.name
-        }}</RouterLink>
-      </nav>
-    </div>
-    <!-- app 下有个根的router-view，那 router里 / 根路径配置的组件，就会在这个根的 router-view里 -->
-    <RouterView />
-  </header>
-</template>
-
 <style scoped>
+.app-rooter {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
 header {
   line-height: 1.5;
   max-height: 100vh;
@@ -90,4 +156,3 @@ nav a:first-of-type {
   }
 }
 </style>
-./router/router.config
