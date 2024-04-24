@@ -151,6 +151,11 @@ export const config = [
     path: '/table',
     name: 'table',
     component: () => import('../views/template/table.vue')
+  },
+  {
+    path: '/socket',
+    name: 'socket',
+    component: () => import('../views/socket/index.vue')
   }
 ]
 

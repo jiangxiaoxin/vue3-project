@@ -40,6 +40,7 @@
                 <a-button @click="showMore = !showMore">更多</a-button>
                 <a-button type="primary" @click="addOne">新增</a-button>
                 <a-button @click="addStep">步骤条</a-button>
+                <a-button @click="showDeps">依赖条</a-button>
               </a-space>
             </a-form-item>
           </a-col>
@@ -89,6 +90,7 @@
 
     <MaterialModal ref="materialModalRef" @success="refrshAfterSuccess" />
     <StepModal ref="stepRef" />
+    <StepDeps ref="stepDepsRef" />
   </div>
 </template>
 <script setup lang="ts">
@@ -96,9 +98,16 @@ import { ref, reactive, onMounted } from 'vue'
 import MaterialModal from './modal.vue'
 import { ModeEnum } from './config'
 import StepModal from './stepNormal/index.vue'
+import StepDeps from './stepDeps/index.vue'
 
 const materialModalRef = ref(null)
 const stepRef = ref(null)
+const stepDepsRef = ref(null)
+
+const showDeps = () => {
+  // debugger
+  stepDepsRef.value?.open()
+}
 
 const showMore = ref(false)
 
