@@ -13,8 +13,10 @@
         {{ JSON.stringify(state, null, 2) }}
       </code>
     </div>
-    <Step1 v-if="activeKey === 0" ref="step1Ref" />
-    <Step2 v-if="activeKey === 1" ref="step2Ref" />
+    <!-- 可以看情况，如果复杂，就v-if，保持dom节点干净，不需要维护状态 -->
+    <!-- 一般就v-show就够用了，通过样式 display：none来控制 -->
+    <Step1 v-show="activeKey === 0" ref="step1Ref" />
+    <Step2 v-show="activeKey === 1" ref="step2Ref" />
     <template #footer>
       <vxe-button @click="prev">上一步</vxe-button>
       <vxe-button @click="next">下一步</vxe-button>

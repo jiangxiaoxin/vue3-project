@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { toRef, ref, inject } from 'vue'
+import { toRef, ref, inject, onMounted } from 'vue'
 const stepState = inject('stepState')
 // @ts-ignore
 const step1State = toRef(stepState, 'step1')
@@ -27,5 +27,9 @@ defineExpose({
   reset: () => {
     formRef.value?.resetFields()
   }
+})
+
+onMounted(() => {
+  console.log('step2 onMounted')
 })
 </script>
