@@ -76,8 +76,8 @@
     </div>
     <div class="table-template_pagination">
       <a-pagination
-        v-model:current="page.pageNum"
-        v-model:pageSize="page.pageSize"
+        :current="page.pageNum"
+        :pageSize="page.pageSize"
         :pageSizeOptions="pagination.options"
         :show-total="pagination.showTotal"
         :total="page.total"
@@ -198,7 +198,13 @@ const editOne = (row) => {
 const viewOne = (row) => {
   materialModalRef.value?.open(row, ModeEnum.view)
 }
-const deleteOne = (row) => {}
+const deleteOne = (row) => {
+  /**
+   * 如果是 Modal.confirm 这种,可以放到这里，就是父组件这
+   * 如果是 删除时，还要填写原因，选择下一步处理人，虽然很简单，但也不要写到这里，而是单独写子组件，在这里通过 ref 调用打开
+   * 父组件只关心，最后是否成功的删除了
+   */
+}
 
 const refrshAfterSuccess = () => {
   hackSearch()

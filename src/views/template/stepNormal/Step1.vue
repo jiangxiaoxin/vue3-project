@@ -17,6 +17,9 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useStepState } from '../stepDeps/state'
+import useMounted from './usemount'
+
+useMounted()
 
 const depState = useStepState()
 const updateDeps = () => {

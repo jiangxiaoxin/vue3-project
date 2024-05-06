@@ -1,5 +1,8 @@
 <template>
   <div class="app-rooter">
+    <outer />
+    <outer />
+    <div>{{ JSON.stringify(Temp) }}</div>
     <RouterView class="router-view-in-app" />
   </div>
 </template>
@@ -13,6 +16,8 @@ import { config as routes } from '@/router/index'
 import AddRouteVue from '@/views/oneRoute/addRoute.vue'
 import ModalProps from '@/views/vxe/modalprops.vue'
 import ModalRef from '@/views/vxe/modalref.vue'
+import outer from './views/ref和reactive/outer.vue'
+import { template as Temp } from './views/ref和reactive/config'
 
 // defineOptions({
 //   name: 'VueProjectApp'
