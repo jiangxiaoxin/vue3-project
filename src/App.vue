@@ -1,8 +1,32 @@
 <template>
   <div class="app-rooter">
-    <outer />
-    <outer />
-    <div>{{ JSON.stringify(Temp) }}</div>
+    <div @click="oneClick" @dblclick="doubleClick">123123</div>
+
+    <!-- <div>
+      <p>input: {{ inputVal }}</p>
+      <button @click="setVal">设置值</button>
+      <input
+        v-model="inputVal"
+        @change="inputChange"
+        @input="inputInput"
+        @keydown="keydownHandler"
+        ref="inputRef"
+      />
+    </div>
+
+    <button @click="push">arr push</button>
+    <button @click="pop">arr pop</button>
+
+    <button @click="resetSs">resetSs</button>
+
+    <div v-for="item in ss.list" :key="item.id">
+      <div>ss: {{ item.id }}</div>
+    </div>
+    <div>
+      <ul>
+        <li v-for="item in arr" :key="item">{{ item }}</li>
+      </ul>
+    </div> -->
     <RouterView class="router-view-in-app" />
   </div>
 </template>
@@ -19,9 +43,98 @@ import ModalRef from '@/views/vxe/modalref.vue'
 import outer from './views/ref和reactive/outer.vue'
 import { template as Temp } from './views/ref和reactive/config'
 
+let oneClickTimer: any
+const oneClick = () => {
+  if (oneClickTimer) {
+    clearTimeout(oneClickTimer)
+    oneClickTimer = null
+  }
+  oneClickTimer = setTimeout(() => {
+    console.log('one click')
+  }, 200)
+}
+
+const doubleClick = (evt: any) => {
+  if (oneClickTimer) {
+    clearTimeout(oneClickTimer)
+    oneClickTimer = null
+  }
+  console.log('double click')
+  // evt.preventDefault()
+  // evt.stopPropagation()
+}
+
+const ss = ref({
+  list: [{ id: Date.now() }]
+})
+
+const resetSs = () => {
+  ss.value.list = [{ id: Date.now() }]
+}
+
+// @ts-ignore
+function Person(name: any) {
+  // @ts-ignore
+  this.name = name
+}
+
+Person.prototype.say = function () {
+  console.log('say1111111')
+}
+// @ts-ignore
+let pa = new Person('aa')
+
+pa.say()
+
+console.log(pa.__proto__ === Person)
+console.log(pa.__proto__ === Person.prototype)
+console.log(pa.__proto__.constructor === Person)
+
+console.log(pa.toString())
+
+console.log(pa)
+
+console.log(Object.prototype.hasOwnProperty.call(Person.prototype, 'toString'))
+
+const arr = ref([1, 2, 3])
+const pop = () => {
+  arr.value.pop()
+}
+const push = () => {
+  arr.value.push(Math.random())
+}
+
 // defineOptions({
 //   name: 'VueProjectApp'
 // })
+
+const setVal = () => {
+  inputVal.value = '123123&#13;&#10;'
+
+  inputRef.value?.dispatchEvent(
+    new KeyboardEvent('keydown', {
+      keyCode: 13,
+      charCode: 0,
+      key: 'Enter',
+      code: 'Enter',
+      bubbles: true
+    })
+  )
+}
+
+const inputRef = ref<HTMLInputElement | null>(null)
+
+const inputVal = ref('')
+const inputChange = (e) => {
+  console.log('🚀 ~ inputChange ~ e:', e)
+}
+const inputInput = (e) => {
+  console.log('🚀 ~ e:', e)
+}
+
+const keydownHandler = (e) => {
+  console.log('🚀 ~ keydownHandler ~ e:', e, e.keyCode, e.charCode)
+}
 
 const modalRef = ref<any>(null)
 const openModal = () => {

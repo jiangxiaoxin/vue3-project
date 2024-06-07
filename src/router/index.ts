@@ -156,6 +156,26 @@ export const config = [
     path: '/socket',
     name: 'socket',
     component: () => import('../views/socket/index.vue')
+  },
+  {
+    path: '/vueuse',
+    name: 'vueuse',
+    component: () => import('../views/state/vueuse.vue')
+  },
+  {
+    path: '/echart',
+    name: 'echart',
+    component: () => import('../views/echart/index.vue')
+  },
+  {
+    path: '/dy',
+    name: 'dynamicform',
+    component: () => import('../views/form/index.vue')
+  },
+  {
+    path: '/cform',
+    name: 'component-form',
+    component: () => import('../views/form/dyform.vue')
   }
 ]
 

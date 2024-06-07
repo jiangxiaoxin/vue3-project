@@ -44,6 +44,10 @@ const routes = [
   {
     to: '/reactive',
     title: '测试reactive'
+  },
+  {
+    to: '/vueuse',
+    title: 'vueuse测试'
   }
 ]
 

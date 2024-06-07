@@ -1,3 +1,32 @@
+// 笛卡尔积
+// 给定组成元素，计算全排列组合
+function multiMulti() {
+  function multi(ar, br) {
+    let result = []
+    for (let i = 0; i < ar.length; i++) {
+      for (let j = 0; j < br.length; j++) {
+        result.push(`${ar[i]}-${br[j]}`)
+      }
+    }
+    return result
+  }
+
+  let arr = [
+    ['黑', '白'],
+    [10, 20, 30],
+    ['中国', '日本'],
+    ['zh', 'en', 'jp']
+  ]
+  let result = arr.shift()
+  while (arr.length > 0) {
+    let temp = arr.shift()
+    result = multi(result, temp)
+  }
+  console.log('--result', result)
+}
+
+multiMulti()
+
 function getA() {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -54,4 +83,4 @@ const sync = async () => {
   await getC()
 }
 
-sync()
+// sync()
