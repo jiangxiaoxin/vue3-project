@@ -58,7 +58,7 @@ export const formConfigs = [
         },
         {
           value: 2,
-          label:"地址2"
+          label: '地址2'
         }
       ]
     },
@@ -165,7 +165,7 @@ export const formConfigs = [
       type: 'input',
       code: 'name',
       title: '名字',
-      required: true,
+      required: true
       // defaultValue: '默认值'
     },
     {
@@ -185,3 +185,7 @@ export const testData = {
   radio: 1,
   checkbox: [1]
 }
+
+// var orderList = [10, 2, 4, 1, 5]
+// orderList.sort((a, b) => a - b)
+// console.log(orderList)

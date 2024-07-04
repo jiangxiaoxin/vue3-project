@@ -176,6 +176,11 @@ export const config = [
     path: '/cform',
     name: 'component-form',
     component: () => import('../views/form/dyform.vue')
+  },
+  {
+    path: '/drag',
+    name: 'drag',
+    component: () => import('../views/draggable/index.vue')
   }
 ]
 

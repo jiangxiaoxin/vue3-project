@@ -2,7 +2,7 @@
   <div v-container>
     <h1>event listener</h1>
 
-    <ul>
+    <!-- <ul>
       <li v-container>
         <p>最普通的情形，btn监听到以后，外层div再监听到</p>
         <div @click="click2" class="size-100" v-bg>
@@ -33,14 +33,14 @@
           <button @click="click1" style="pointer-events: auto">click</button>
         </div>
       </li>
-    </ul>
+    </ul> -->
 
     <div>
       <input type="text" />
     </div>
   </div>
 </template>
-<script setup>
+<!-- <script setup>
 const click1 = (event) => {
   console.log('click1==', event)
 }
@@ -52,6 +52,31 @@ const click3 = (event) => {
   console.log('click3=====', event)
   event.stopPropagation()
 }
+</script> -->
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+export default defineComponent({
+  async created() {
+    console.log('created')
+    try {
+      await longtime()
+    } catch (a) {}
+  },
+
+  mounted() {
+    console.log('--mounted')
+  },
+  methods: {
+    longtime() {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve(123)
+        }, 10000)
+      })
+    }
+  }
+})
 </script>
 <style lang="less">
 .size-100 {
