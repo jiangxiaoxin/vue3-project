@@ -135,7 +135,7 @@ export const config = [
   {
     path: '/vxe',
     name: 'vxe',
-    component: () => import('../views/vxe/index.vue')
+    component: () => import('../views/vxe/grid.vue')
   },
   {
     path: '/event',
@@ -181,6 +181,11 @@ export const config = [
     path: '/drag',
     name: 'drag',
     component: () => import('../views/draggable/index.vue')
+  },
+  {
+    path: '/alp',
+    name: 'alp',
+    component: () => import('../views/alp/index.vue')
   }
 ]
 

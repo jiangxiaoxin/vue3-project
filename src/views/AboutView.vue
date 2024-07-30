@@ -12,6 +12,7 @@
     <p>自己的 bar: {{ bar }}</p>
     <button @click="changeBar">修改bar</button>
     <ProvideInject v-container />
+    <div>123</div>
   </div>
 </template>
 

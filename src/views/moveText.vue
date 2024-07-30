@@ -1,26 +1,40 @@
 <template>
-  <div class="scroll-container" ref="containerRef">
-    <div class="scroll-text" ref="scrollRef">{{ text }}</div>
+  <div ref="containerRef" class="scroll-container" :class="outterCls" >
+    <div ref="scrollRef" class="scroll-text"  :class="innerCls">{{ text }}</div>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
-const containerRef = ref<HTMLDivElement>()
-const scrollRef = ref<HTMLDivElement>()
+import {nextTick, onMounted, onUnmounted, ref} from 'vue'
+// 禁止自动继承外层属性
+defineOptions({
+  inheritAttrs: false
+})
 
 const props = defineProps({
   text: {
     type: String,
-    default: '这是滚动的文本。'
+    required: true,
+    default: '默认的滚动文字'
   },
   speed: {
     type: Number,
     default: 1
+  },
+  innerCls: {
+    type: String,
+  },
+  outterCls: {
+    type: String
   }
 })
 
+const containerRef = ref<HTMLDivElement>()
+const scrollRef = ref<HTMLDivElement>()
+
 onMounted(() => {
-  scrollText()
+  nextTick(() => {
+    scrollText()
+  })
 })
 
 onUnmounted(() => {
@@ -47,7 +61,6 @@ function scrollText() {
     if (currentPosition.value < -textWidth) {
       currentPosition.value = containerWidth
     }
-
     animationId.value = requestAnimationFrame(move)
   }
 
@@ -68,12 +81,11 @@ function scrollText() {
 <style scoped>
 .scroll-container {
   overflow: hidden;
-  background: #aaaaaa;
 }
 
 .scroll-text {
-  /* background: blue; */
-  /* width: 300px; */
   width: max-content;
+  white-space: nowrap;
+  cursor: pointer;
 }
 </style>

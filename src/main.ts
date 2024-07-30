@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
+import UseTemplate from './views/UseTemplate'
 import router from './router'
 import directives from './directives'
 // import ElementPlus from 'element-plus'
@@ -20,6 +21,8 @@ import 'ant-design-vue/dist/reset.css'
 
 import VXETable from 'vxe-table'
 import 'vxe-table/lib/style.css'
+import ExcelJS from 'exceljs'
+import VXETablePluginExportXLSX from 'vxe-table-plugin-export-xlsx'
 
 const zindex = useZIndex()
 // console.log(
@@ -30,6 +33,7 @@ const zindex = useZIndex()
 // )
 
 const app = createApp(App)
+// const app = createApp(UseTemplate)
 
 app.component('glo', GlobalVue)
 
@@ -62,6 +66,11 @@ app.provide('globalMsg', 'hello-world')
 
 // app.use(ElementPlus)
 app.use(Antd)
+
+VXETable.use(VXETablePluginExportXLSX, {
+  ExcelJS
+})
+
 app.use(VXETable)
 
 app.mount('#app')

@@ -3,15 +3,17 @@
     <a-form :model="formState" ref="formRef" :rules="formRules">
       <template v-for="item in formItemConfig" :key="item.code">
         <a-form-item :label="item.title + '/' + item.code" :name="item.code" v-if="item.component">
-          <component :is="item.component" v-model:value="formState[item.code]" v-bind="item.props" allowClear/>
+          <component
+            :is="item.component"
+            v-model:value="formState[item.code]"
+            v-bind="item.props"
+            allowClear
+          />
         </a-form-item>
       </template>
-
     </a-form>
 
-    <div>
-      time: {{ testData.time }}
-    </div>
+    <div>time: {{ testData.time }}</div>
 
     <button @click="submit">提交</button>
     <button @click="print">数据</button>
@@ -21,7 +23,7 @@
 </template>
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import {formConfigs} from "./config"
+import { formConfigs } from './config'
 const formRef = ref<any>(null)
 const formState = ref<any>({})
 // const formStateTemplate = {} // 用来清空的
@@ -32,12 +34,12 @@ const exist = (target: any) => {
 }
 
 const componentMap = {
-  'input': 'a-input',
-  'inputnumber': 'a-input-number',
-  'textarea': 'a-textarea',
-  'select': 'a-select',
-  'checkbox': 'a-checkbox-group',
-  'radio': 'a-radio-group'
+  input: 'a-input',
+  inputnumber: 'a-input-number',
+  textarea: 'a-textarea',
+  select: 'a-select',
+  checkbox: 'a-checkbox-group',
+  radio: 'a-radio-group'
 }
 
 // let testData = reactive({
@@ -67,9 +69,9 @@ const getConfig = () => {
 }
 
 const formatFormConfig = () => {
-  return getConfig().then(config => {
+  return getConfig().then((config) => {
     config.forEach((item: any) => {
-      if(item.required) {
+      if (item.required) {
         formRules.value[item.code] = [
           {
             required: true,
@@ -78,17 +80,17 @@ const formatFormConfig = () => {
         ]
       }
 
-      if(componentMap[item.type]) {
+      if (componentMap[item.type]) {
         item.component = componentMap[item.type]
       } else {
         item.component = null
       }
 
       // 将组件的特殊 attr 提出来，然后通过 v-bind 直接绑定整个对象
-      if(item.type === 'select') {
-        item.mode  = item.multiple ? 'multiple' : null
+      if (item.type === 'select') {
+        item.mode = item.multiple ? 'multiple' : null
       }
-      const {mode, options, maxlength, picker} = item
+      const { mode, options, maxlength, picker } = item
       item.props = {
         mode,
         options,
@@ -96,16 +98,15 @@ const formatFormConfig = () => {
         picker
       }
 
-      if(exist(item.defaultValue)) {
+      if (exist(item.defaultValue)) {
         formState.value[item.code] = item.defaultValue
-      } else if(item.type === 'select' && item.multiple === true) {
+      } else if (item.type === 'select' && item.multiple === true) {
         formState.value[item.code] = []
       } else {
         formState.value[item.code] = null
       }
 
       // formStateTemplate[item.code] = formState.value[item.code]
-
     })
     formItemConfig.value = config
     console.log('==最后的config', config)
@@ -115,7 +116,7 @@ const formatFormConfig = () => {
 formatFormConfig()
 
 const submit = () => {
-  formRef.value?.validate().then(res => {
+  formRef.value?.validate().then((res) => {
     console.log('--res', res)
   })
 }
