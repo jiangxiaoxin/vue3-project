@@ -186,6 +186,16 @@ export const config = [
     path: '/alp',
     name: 'alp',
     component: () => import('../views/alp/index.vue')
+  },
+  {
+    path: '/fuziprops',
+    name: '父子props',
+    component: () => import('../views/props/父子传递.vue') //! 用中文起名也可以
+  },
+  {
+    path: '/deep',
+    name: 'deep',
+    component: () => import('../views/ref和reactive/deep.vue')
   }
 ]
 

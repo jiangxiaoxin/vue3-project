@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../../plugins/jquery-3.7.1.js"></script>
+  </head>
+  <body>
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Dynamic SVG Triangle Fill</title>
+      </head>
+      <style>
+        html,
+        body {
+          width: 100%;
+          height: 100%;
+        }
+
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+      </style>
+      <body>
+        <div
+          style="
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: aqua;
+            position: relative;
+            overflow: hidden;
+          "
+        >
+          <!-- viewBox="0 0 600 600"
+            preserveAspectRatio="xMidYMid meet" -->
+          <svg
+            id="svg"
+            width="600px"
+            height="600px"
+            xmlns="http://www.w3.org/2000/svg"
+            style="background-color: yellow; overflow: hidden"
+          >
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: white; stop-opacity: 1" />
+                <stop id="fillStop1" offset="50%" style="stop-color: white; stop-opacity: 1" />
+                <stop id="fillStop2" offset="50%" style="stop-color: red; stop-opacity: 1" />
+                <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
+              </linearGradient>
+            </defs>
+            <!-- <polygon points="100,10 10,190 190,190" fill="url(#gradient)" /> -->
+            <!-- <polygon
+              points="50,300 250,300 250,100 200,50 100,50 50,100"
+              fill="url(#gradient)"
+              style="stroke: blue"
+            /> -->
+            <path xmlns="http://www.w3.org/2000/svg" class="st7" d="M201,51.59c0,66.47,0,132.94,0,199.41H1c0-66.64,0-133.28,0-199.92C15.54,34.39,30.08,17.69,44.62,1  c35.56,0,71.11,0,106.67,0C167.86,17.86,184.43,34.72,201,51.59z" fill="url(#gradient)"/>
+
+            <!-- Define a circle with red stroke and blue fill -->
+            <circle
+              cx="400"
+              cy="50"
+              r="10"
+              style="fill: blue; stroke: red; stroke-width: 2"
+              id="circle"
+            />
+
+            <foreignObject width="120" height="100">
+              <div><p>文字。</p>
+              <input type="text"></div>
+            </foreignObject>
+
+            <text
+              id="text"
+              x="50%"
+              y="50%"
+              text-anchor="middle"
+              alignment-baseline="middle"
+              font-family="Arial"
+              font-size="20"
+              fill="black"
+            >
+              Hello, SVG!
+            </text>
+          </svg>
+
+          <div style="position: absolute; right: 0; top: 0; background-color: blue">
+            <!-- Slider to control the fill level -->
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value="50"
+              id="fillLevel"
+              oninput="updateFillLevel(this.value)"
+            />
+
+            <button id="updateFill" type="button">改圆的颜色</button>
+            <button id="getSVG">svg</button>
+          </div>
+        </div>
+
+        <script>
+          document.getElementById('updateFill').addEventListener('click', () => {
+            var circle = document.getElementById('circle')
+            circle.setAttribute('style', 'fill: green')
+
+            document.getElementById('text').textContent = Date.now().toString()
+          })
+
+          document.getElementById('text').addEventListener('click', (e) => {
+            alert(e.target.textContent)
+          })
+
+          $('#getSVG').click(() => {
+            var svg = document.getElementById('svg')
+            svg.style.width = '100%'
+            svg.style.height = '100%'
+          })
+        </script>
+
+        <script>
+          function updateFillLevel(percent) {
+            // Get the gradient by its ID
+            var gradient = document.getElementById('gradient')
+
+            // Get the stop element that we want to update
+            var fillStop1 = document.getElementById('fillStop1')
+
+            // Update the offset of the stop element
+            fillStop1.setAttribute('offset', percent + '%')
+
+            // Get the stop element that we want to update
+            var fillStop2 = document.getElementById('fillStop2')
+
+            // Update the offset of the stop element
+            fillStop2.setAttribute('offset', percent + '%')
+          }
+        </script>
+      </body>
+    </html>
+  </body>
+</html>

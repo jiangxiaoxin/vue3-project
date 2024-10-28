@@ -7,9 +7,9 @@
 import { ref, reactive } from 'vue'
 const gridRef = ref()
 const gridOptions = reactive({
-  exportConfig: {
-    type: 'xlsx'
-  },
+  // exportConfig: {
+  //   type: 'xlsx'
+  // },
   columns: [
     { type: 'seq', width: 70 },
     { field: 'name', title: 'Name' },
@@ -27,10 +27,10 @@ const gridOptions = reactive({
 const exportData = () => {
   const $grid = gridRef.value
   if ($grid) {
-    $grid.openExport()
-    // $grid.exportData({
-    //   type: 'xlsx'
-    // })
+    // $grid.openExport()
+    $grid.exportData({
+      type: 'xlsx'
+    })
   }
 }
 </script>

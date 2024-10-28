@@ -5,7 +5,7 @@ const container = (el: HTMLElement, binding: any) => {
     el.dataset.devColor = color
   }
 
-  el.style.border = `2px solid ${el.dataset.devColor}`
+  el.style.border = `2px solid ${el.dataset.devColor}` //outline
   el.style.padding = '10px'
 }
 

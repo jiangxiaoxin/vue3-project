@@ -7,8 +7,8 @@ import App from './App.vue'
 import UseTemplate from './views/UseTemplate'
 import router from './router'
 import directives from './directives'
-// import ElementPlus from 'element-plus'
-// import 'element-plus/dist/index.css'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import GlobalVue from './components/Global.vue'
 import * as config from './config'
 console.log(config.foo)
@@ -58,13 +58,23 @@ app.directive('addCls', (el: HTMLElement, binding) => {
   el.classList.add(binding.value || 'no-cls')
 })
 
+app.directive('collect', {
+  mounted(el, binding, vnode) {
+    el.addEventListener('click', (e) => {
+      console.log('collect e', e)
+      console.log(binding)
+      console.log(vnode)
+    })
+  }
+})
+
 Object.keys(directives).forEach((directiveKey) => {
   app.directive(directiveKey, directives[directiveKey] as any)
 })
 
 app.provide('globalMsg', 'hello-world')
 
-// app.use(ElementPlus)
+app.use(ElementPlus)
 app.use(Antd)
 
 VXETable.use(VXETablePluginExportXLSX, {
