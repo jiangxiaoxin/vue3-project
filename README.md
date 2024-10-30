@@ -72,7 +72,7 @@ d. 兄弟组件，两个都写同名的普通 class，不用scoped 限定范围�
 
 > 在一个元素上添加不同的class，这些class最后肯定要做样式合并，同名的属性最后谁有效呢？抛除 `important` 这种，是看两个样式谁先定义，谁后定义，后定义的覆盖前面定义的
 
-9.  写组件的几种方式
+9. 写组件的几种方式
 
     a. 最常见的 template script style那种方式,写 sfc vue文件
 
@@ -80,7 +80,7 @@ d. 兄弟组件，两个都写同名的普通 class，不用scoped 限定范围�
 
     这种tsx的方式，只是用tsx的语法来写vue的组件，用的还是vue的ref，watch这些api，不是用react。这不能搞混了。useState，useEffect 这些是没有的.
 
-    > 有一点非常重要，在.vue文件里，template 里的`{{ count }} `是会自动解出它的value属性，但是在tsx中，人家就不知道了，`<span>{ count.value }</span>`这样才能显示count的值
+    > 有一点非常重要，在.vue文件里，template 里的`{{ count }}`是会自动解出它的value属性，但是在tsx中，人家就不知道了，`<span>{ count.value }</span>`这样才能显示count的值
 
     tsx 是纯ts代码，它不能写 css，要将css 单独写成文件，然后import进去，使用module css，可以将这些class 当成变量一样绑定
 
@@ -108,6 +108,8 @@ d. 兄弟组件，两个都写同名的普通 class，不用scoped 限定范围�
 
         在 tsx 里也可以用动态的方法去创建要显示的节点。`writeTsx/loopItem.tsx` 就用方法的形式创建显示对象。这也是应该的，因为已经不是.vue那样子写组件，不能用`v-for`来循环创建对象
 
+    10.5 prop 定义时设置required为true，那就表示这个属性一定要传。这样后面的代码就不需要关心这个属性为空的时候报错。因为都已经声明为必填了，开发时console里也不断的提醒了，使用者还是不传，那就只能说明使用者有问题。为了防止真的因为疏忽而导致代码直接崩了，一般会加个default值，但是加了只是保护，console依然会提示缺少必填项
+        prop 定义时，不写required为true，但还是写default值，这个default在属性缺省的情况下，会生效的
 11. 写个scrollbar组件？
 
 el-scrollbar就是很好的参照.通过计算中间比例，换算出scrollbar的 thumb位置应该在哪
@@ -124,12 +126,7 @@ scrollWidth
 
 scrollHeight
 
-
 ### vue router
-
-
-
-
 
 ### vue query
 
@@ -175,14 +172,11 @@ scrollHeight
 
 2. 引用与值
 
-
-
 ## 工具链
 
 ### vite
 
 vite 在dev模式下用 esbuild进行构建，在prod模式下用的是rollup构建
-
 
 1. mock 的配置
 2. dev server的配置

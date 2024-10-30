@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
+import App1111 from './App1111.vue'
 import UseTemplate from './views/UseTemplate'
 import router from './router'
 import directives from './directives'
@@ -33,6 +34,7 @@ const zindex = useZIndex()
 // )
 
 const app = createApp(App)
+// const app = createApp(App1111)
 // const app = createApp(UseTemplate)
 
 app.component('glo', GlobalVue)
