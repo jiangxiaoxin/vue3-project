@@ -196,6 +196,10 @@ export const config = [
     path: '/deep',
     name: 'deep',
     component: () => import('../views/ref和reactive/deep.vue')
+  },
+  {
+    path: '/slot',
+    component: () => import('../views/slot/index.vue')
   }
 ]
 
