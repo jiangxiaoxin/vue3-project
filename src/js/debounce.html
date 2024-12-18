@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./jquery-3.7.1.js"></script>
+</head>
+<body>
+    <button id="btn">click</button>
+
+    <script>
+
+        let f1 = debounce(() => {
+            console.log('11')
+        }, 1000)
+
+        let f2 = debounce((e) => {
+            console.log('2', e)
+        }, 1000)
+
+        // $('#btn').click(f2)
+
+        let f3 = debounce(function(a,b,c) {
+            console.log("🚀 ~ f3 ~ a,b,c:", a,b,c) 
+        }, 1000)
+
+        // f3(1,2,3)
+
+        // for(let i=0;i<5;i++) {
+        //     f3(1,2,3)
+        // }
+
+        let obj = {
+            name: 'objbbbb',
+            f4: debounce(function(a,b,c) {
+                console.log("🚀 ~ f4:debounce ~ a,b,c:", a,b,c, '--', this.name, this) // this-> obj
+                
+                
+            }, 1000),
+            f5: debounce((a,b,c) => {
+                console.log("🚀 ~ f5:debounce ~ a,b,c:", a,b,c, this.name, this) // this->window
+            }, 1000)
+        }
+
+        for (let index = 0; index < 5; index++) {
+            obj.f4(1,1,1)
+
+            obj.f5(2,2,2)
+            
+        }
+
+        // let objCopy = {
+        //     name: 'objCopy'
+        // }
+        // objCopy.f4 = obj.f4
+        // objCopy.f5 = obj.f5
+
+        // for (let index = 0; index < 5; index++) {
+        //     obj.f4(3)
+
+        //     obj.f5(4)
+            
+        // }
+
+        let btn = document.getElementById('btn')
+        btn.addEventListener('click', f2)
+
+        
+
+        function debounce(fn, wait) {
+            let timeout
+
+            return function debounced(...args) {
+                // console.log(Array.isArray(args));
+                // console.log(arguments);
+                
+                
+                if(timeout) {
+                    clearTimeout(timeout)
+                    timeout = null
+                }
+                const context = this // 谁调，this就指向谁，
+                timeout = setTimeout(() => {
+                    clearTimeout(timeout)
+                    timeout = null
+                    fn.apply(this,args)
+                }, wait);
+            }
+        }
+
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+
+/* 
+        .list > li:first-child {
+            color: blue;
+            background-color: red;
+        }
+
+        .list> li:nth-child(2) {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .list> li:nth-child(2n+1) {
+            border-bottom: 1px solid dashed;
+            text-align: right;
+            font-weight: bolder;
+            color: green !important;
+        }
+        li:nth-last-child(1) {
+            border: 1px solid red;
+        } */
+
+        li:nth-of-type(2) {
+            font-size: 40px;
+            color: red;
+        }
+    </style>
+</head>
+
+
+<body>
+    <h1>伪类</h1>
+    <ul class="list">
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+    </ul>
+
+    <h1>伪元素</h1>
+    <p>abcded 如果你想选中一段的第一行，你可以把它用一个<span>元素包起来，然后使用元素选择器；不过，如果包起来的单词/字符数目长于或者短于父元素的宽度，这样做会失败。由于我们一般不会知道一行能放下多少单词/字符——因为屏幕宽度或者字体大小改变的时候这也会变——通过改变 HTML 的方式来可预测地这么做是不可能的</p>
+
+    <style>
+        p::first-line {
+            color: red;
+            
+        }
+
+        p::first-letter {
+            font-size: 100px;
+            text-transform: capitalize;
+        }
+
+        /* p::before{
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: blue;
+        } */
+    </style>
+</body>
+</html>

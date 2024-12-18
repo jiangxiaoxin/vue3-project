@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多边形背景与边框示例</title>
+<style>
+  .polygon-background {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    background-color: #3498db; /* 多边形的背景颜色 */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* 定义多边形的形状 */
+    overflow: hidden; /* 防止边框溢出 */
+  }
+
+  .polygon-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent; /* 边框颜色透明 */
+    /* border: 10px solid #e74c3c;  */
+    /* 边框颜色和宽度 */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* 边框的多边形形状 */
+    z-index: 2; /* 确保边框在背景之上 */
+  }
+</style>
+</head>
+<body>
+
+<div class="polygon-background"></div>
+
+</body>
+</html>

@@ -13,7 +13,10 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:build": "vuepress build docs",
+    "css": "vite serve ./src/css",
+    "js": "vite serve ./src/js "
+
   },
   "dependencies": {
     "@vue-office/docx": "^1.6.2",
@@ -22,6 +25,8 @@
     "echarts": "^5.5.0",
     "element-plus": "^2.3.14",
     "exceljs": "^4.4.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "less": "^4.2.0",
     "less-loader": "^11.1.3",
     "lodash": "^4.17.21",

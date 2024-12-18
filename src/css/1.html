@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+      .box-1 {
+        width: 200px;
+        background-color: red;
+        /* overflow: hidden;
+            text-overflow: ellipsis; */
+        margin-left: 100px;
+        margin-top: 200px;
+      }
+    </style>
+    <div style="width: 100px" class="box-1">
+      <span>ladjlal;sdfjk;asdfas;ldfal;sdkfj;asdkjfa;sjkdfasdf</span>
+    </div>
+
+    <div class="bg-red bg-blue">一个div,背景色是什么</div>
+
+    <style>
+      .bg-red {
+        background: red;
+      }
+
+      .bg-blue {
+        background: blue;
+      }
+    </style>
+
+    <h2 class="clip">我是一个h2， 我有提醒背景色</h2>
+
+    <style>
+      /* .clip {
+        background:
+          linear-gradient(#3498db, #3498db) no-repeat,
+          linear-gradient(#3498db, #3498db) no-repeat;
+        background-size:
+          100% 50%,
+          100% 50%;
+        background-position: left, right;
+        transform: skewX(-20deg);
+        margin: 50px;
+      } */
+
+
+
+
+    </style>
+
+
+<h2 class="polygon-background">多边形背景</h2>
+<style>
+    .polygon-background {
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+    background-color: #3498db; /* 多边形的背景颜色 */
+    clip-path: polygon(50px 0, 100% 0, 100% 100%, 0 100%, 0 50px); /* 定义多边形的形状 */
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+</style>
+  </body>
+</html>

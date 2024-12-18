@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>function</title>
+  </head>
+  <body>
+    <script>
+        'use strict';
+      const obj = {
+        i: 10,
+        b: () => console.log(this.i, this),
+        c() {
+          console.log(this.i, this)
+        }
+      }
+
+      obj.b() // 输出 undefined, Window { /* … */ }（或全局对象）
+      obj.c() // 输出 10, Object { /* … */ }
+
+      var arr = [1,2,3]
+      console.log(arr.slice(1,2))
+      console.log(arr);
+
+      arr.splice(2,0, 100)
+      console.log(arr);
+      
+      
+    </script>
+  </body>
+</html>

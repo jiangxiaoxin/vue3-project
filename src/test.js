@@ -84,3 +84,71 @@ const sync = async () => {
 }
 
 // sync()
+
+var arr = [
+  {
+    rq: '10-1',
+    value: [1, 2, 3, 4, 5]
+  },
+  {
+    rq: '10-2',
+    value: [1, 2]
+  },
+  {
+    rq: '10-3',
+    value: [1, 2, 3, 4, 5, 6, 7]
+  }
+]
+/**
+ * [
+ *  [1,2,3,4,5]
+ * [1,2]
+ * [1,2,3,4,5,6,7]
+ *
+ * ]
+ *
+ *
+ * map
+ * newMap
+ *
+ * [
+ * [1,1,1,]
+ * [2,2,2,]
+ * [3,x,3,]
+ * [4,x,4,]
+ * [5,x,5,]
+ * [x,x,6,]
+ * [x,x,7]
+ * ]
+ *
+ * newMap
+ *
+ *
+ *
+ */
+
+function trans(arr) {
+  let row = (length = arr.length)
+  let col = 0
+  let map = []
+  for (let i = 0; i < length; i++) {
+    col = Math.max(col, arr[i].value.length)
+    map.push(arr[i].value)
+  }
+
+  let newMap = []
+  for (let i = 0; i < col; i++) {
+    let temp = new Array(row).fill(null)
+    newMap.push(temp)
+  }
+
+  for (let i = 0; i < row; i++) {
+    for (let j = 0; j < col; j++) {
+      newMap[j][i] = map[i][j]
+    }
+  }
+
+  console.log('newMap', newMap)
+}
+
+trans(arr)
