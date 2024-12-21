@@ -5,6 +5,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import App1111 from './App1111.vue'
+import List from "@/views/list/App.vue"
 import UseTemplate from './views/UseTemplate'
 import router from './router'
 import directives from './directives'
@@ -86,3 +87,5 @@ VXETable.use(VXETablePluginExportXLSX, {
 app.use(VXETable)
 
 app.mount('#app')
+
+1111
