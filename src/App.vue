@@ -1,6 +1,6 @@
 <template>
 
-<fixedHeightTranform />
+<testFixedHeightTransform />
   <!-- <fixedHeight /> -->
 
   <!-- <router-view></router-view> -->
@@ -18,7 +18,7 @@ import './js/arrow-function'
 
 <script setup lang="ts">
 import fixedHeight from './views/longList/fixedHeight.vue';
-import fixedHeightTranform from './views/longList/fixedHeightTranform.vue';
+import testFixedHeightTransform from './views/longList/testFixedHeightTransform.vue';
 
 
 </script>
