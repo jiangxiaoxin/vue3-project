@@ -15,7 +15,7 @@
 </template>
 <script lang="ts" setup>
 import fixedHeightTranform from './fixedHeightTranform.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUpdated, ref } from 'vue'
 const tableList = ref<any[]>([])
 
 const itemHeight = 60
@@ -23,6 +23,10 @@ const safeArea = 10
 
 onMounted(() => {
   setTimeout(() => {
+
+    // tableList.value = []
+    // return
+
     tableList.value = new Array(500).fill(0).map((item, index) => {
       return {
         id: index,
@@ -31,6 +35,11 @@ onMounted(() => {
     })
   }, 2000)
 })
+
+onUpdated(() => {
+  console.log('updated')
+})
+
 function add100() {
   let list = []
   let length = tableList.value.length
