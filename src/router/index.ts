@@ -200,6 +200,10 @@ export const config = [
   {
     path: '/slot',
     component: () => import('../views/slot/index.vue')
+  },
+  {
+    path: '/guide',
+    component: () => import("../views/基础培训/index.vue")
   }
 ]
 
