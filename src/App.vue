@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import './js/arrow-function'
+// import './js/arrow-function'
 
   
 

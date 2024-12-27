@@ -203,7 +203,7 @@ export const config = [
   },
   {
     path: '/guide',
-    component: () => import("../views/基础培训/index.vue")
+    component: () => import("../views/后台培训/index.vue")
   }
 ]
 
