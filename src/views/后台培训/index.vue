@@ -3,7 +3,7 @@
 
   <!-- <ref和reavtive对比 /> -->
 
-  <!-- <shallow响应式 /> -->
+  <shallow响应式 />
 
   <!-- <p>父组件内的count: {{ count }}</p>
 
@@ -11,8 +11,8 @@
 
   <a子组件通过props修改父组件的值 :obj="obj"/> -->
 
-  <a父子生命周期 v-if="show"/>
-  <button @click="show = !show">切换</button>
+  <!-- <a父子生命周期 v-if="show"/>
+  <button @click="show = !show">切换</button> -->
 
 </template>
 <script setup lang="ts">
@@ -23,7 +23,7 @@ import { ref } from 'vue'
 // import  "./异步2"
 // import  "./异步3"
 
-// import shallow响应式 from "./shallow响应式.vue";
+import shallow响应式 from "./shallow响应式.vue";
 
 // import a子组件通过props修改父组件的值 from './子组件通过props修改父组件的值.vue' // 要用字母
 
