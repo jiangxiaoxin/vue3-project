@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        /* height: 400px; */
+        background: lightblue;
+        padding: 20px;
+      }
+
+      img {
+        /* width: 50px;
+        height: 50px; */
+        float: left;
+      }
+
+
+      /* .content {
+        margin-left: 60px;
+      } */
+
+      /* 通过margin 和 padding 也可以特殊的完成分离图片和文字的功能。但这个边距要确定大于图片尺寸。如果是图片尺寸是动态的，特别是大屏里，那这边距就没法支持了 */
+
+      /* .content {
+        padding-left: 350px;
+      } */
+
+      /* 通过bfc，让文字跟左侧的浮动img隔离开 */
+      /* 然后添加点margin 或者 padding 让ui更好看 */
+      .content {
+        overflow: auto;
+        padding-left: 20px;
+      }
+
+    </style>
+
+    <div class="container">
+      <img src="./300.png" alt="" />
+      <div class="content">
+        <h1>我是一个大标题</h1>
+        <p>
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+          我是一个段落，记录了很多信息asdfasdfasdflasdasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasd
+        </p>
+      </div>
+    </div>
+
+
+    <div style="margin-bottom: 100px;background-color: red;">111</div>
+    <div style="margin-top: 200px;background-color: blue;overflow: auto;">
+        <p style="float: left;">222</p>
+    </div>
+    <div>333</div>
+  </body>
+</html>

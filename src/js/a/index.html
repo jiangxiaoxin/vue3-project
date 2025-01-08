@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>aaa</title>
+    <script src="../js-cookie.js"></script>
+    <script src="../jquery-3.7.1.js"></script>
+  </head>
+  <body>
+    <h1>aaa</h1>
+    <a href="./b/index.html">去b</a>
+    <a href="../c/index.html">去c</a>
+
+    <button id="getAllCookie">显示所有的cookie</button>
+    <button id="setCookieWithDefaultPath">设置默认路径cookie</button>
+    <button id="setCookieWithOwnPath">设置自己的cookie</button>
+    <button id="setCookieWithOtherPath">设置别人的cookie</button>
+    <button id="getToken">取 token这个cookie</button>
+    <button id="setToken">设置token</button>
+
+    <script>
+      /*
+ * a
+* |--b
+* |   |--index.html
+* |
+* |--index.html
+
+* a 里默认方式设置cookie，path 会设置在 / 下，在a和b里都能取到这个cookie
+* b 设置自己的 cookie，path 定在 /a/b下，在a里取不到这个cookie，在b里能取到
+* a 里设置cookie，path 定在 /a下，在a里能取到，在b里也能娶到
+* a 设置cookie，但path 设置个完全无关的地址，比如 /c，这样能设置上，但在a里取不到
+* 【在一个路径下设置cookie，在这个路径和子路径下都能取到，但是在别的不相关的路径，包括父级路径下，取不到】
+* HttpOnly 只能通过发送请求时带着cookie，而不能通过js去调用cookie
+*domain 限制只能在这个域名下,包括子域名,但不能跨域名
+.test.com 里设置了，那么a.test.com 和 b.test.com 都能取到.同样设置domain 为a.test.com 后，a.test.com能娶到，但b.test.com取不到，test.com 也娶不到
+path 是为了一个域名下，不同的路径之间能不能访问
+ **/
+    </script>
+
+    <script>
+      $('#getAllCookie').click(() => {
+        console.log(Cookies.get())
+      })
+
+      $('#setCookieWithOwnPath').click(() => {
+        Cookies.set('test-a', 'a里设置自己的，/a', { path: '/a' })
+      })
+
+      $('#setToken').click(() => {
+        Cookies.set('token', '从a里设置token，没有设置路径')
+      })
+
+      $('#setCookieWithOtherPath').click(() => {
+        Cookies.set('test-c', 'a里面，/c,123', { path: '/c' })
+      })
+    </script>
+  </body>
+</html>

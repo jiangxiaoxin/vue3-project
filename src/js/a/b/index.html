@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bbb</title>
+    <script src="../../js-cookie.js"></script>
+    <script src="../../jquery-3.7.1.js"></script>
+</head>
+<body>
+    <h1>bbb</h1>
+    <a href="../index.html">去a</a>
+
+    <button id="getAllCookie">显示所有的cookie</button>
+    <button id="setCookieWithDefaultPath">设置默认路径cookie</button>
+    <button id="setCookieWithOwnPath">设置自己的cookie</button>
+    <button id="setCookieWithOtherPath">设置别人的cookie</button>
+    <button id="getToken">取 token这个cookie</button>
+
+    <script>
+        $('#getAllCookie').click(() => {
+            console.log(Cookies.get())
+        })
+
+        $('#setCookieWithOwnPath').click(() => {
+            Cookies.set('test-b1', 'b里设置，/a/b', { path: '/a/b' })
+        })
+
+        $('#setCookieWithDefaultPath').click(() => {
+            Cookies.set('test-b2', new Date().toLocaleString())
+        })
+
+        $('#getToken').click(() => {
+            console.log(Cookies.get('token'))
+        })
+    </script>
+</body>
+</html>

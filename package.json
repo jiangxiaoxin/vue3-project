@@ -14,8 +14,8 @@
     "format": "prettier --write src/",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "css": "vite serve ./src/css",
-    "js": "vite serve ./src/js "
+    "css": "vite ./src/css --port 3331",
+    "js": "vite ./src/js --port 4335"
   },
   "dependencies": {
     "@vue-office/docx": "^1.6.2",

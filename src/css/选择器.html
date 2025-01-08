@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+        html {
+            font-size: 15px;
+        }
+      .highlight {
+        color: blue;
+        font-size: 5rem;
+      }
+      /* 
+        div ~ p {
+            color: red;
+        } */
+
+      /* .highlight ~ p {
+            color: green;
+        } */
+
+      .highlight ~ .title {
+        color: red;
+      }
+
+      h1 {
+        color: red;
+      }
+
+      h1[title] {
+        color: green;
+      }
+    </style>
+
+    <p>0</p>
+    <div class="highlight">highlight</div>
+    <p class="title">1</p>
+    <p class="title">2</p>
+    <p class="title">3</p>
+    <div style="margin: 0.5rem;padding: 2rem;">一个div</div>
+    <p class="title" style="font-size: 2rem;">4</p>
+    <p class="title" style="font-size: 1rem;">5</p>
+    <h1 title="我是个h1的title">我是个h1</h1>
+    <h1>我不带title的h1</h1>
+  </body>
+</html>

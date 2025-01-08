@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./jquery-3.7.1.js"></script>
+</head>
+<body>
+    <script>
+        let lastTime = Date.now()
+        // $(document).ready(function() {
+        //     setInterval(function() {
+        //         let now = Date.now()
+        //         let duration = now - lastTime
+                
+        //         console.log(duration, Math.round(duration / 1000), document.hidden ? '隐藏' : '显示')
+        //         lastTime = now
+        //         $('#msg').html(new Date().toLocaleString());
+        //     }, 100);
+        // })
+
+        $(document).on('visibilitychange',function() {
+            if(document.hidden) {
+                console.log('页面隐藏', Date.now());
+            } else {
+                console.log('页面显示', Date.now());
+            }
+        })
+
+    </script>
+    <div id="msg"></div>
+</body>
+</html>
