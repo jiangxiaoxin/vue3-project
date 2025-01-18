@@ -204,6 +204,10 @@ export const config = [
   {
     path: '/guide',
     component: () => import("../views/后台培训/index.vue")
+  },
+  {
+    path: '/prepare',
+    component: () => import("../views/prepare/index.vue")
   }
 ]
 
