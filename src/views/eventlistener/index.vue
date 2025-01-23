@@ -27,7 +27,7 @@
           父元素none之后，子元素不修改，那么pointer-events 会整体继承下去，所以子元素也不响应事件了
         </p>
         <p>
-          但如果父元素设置none后，子元素又修改了，那么点击子元素时，父元素的监听器还是会跑。但如果只点击父元素，父元素是不会出发监听器的
+          但如果父元素设置none后，子元素又修改了，那么点击子元素时，父元素的监听器还是会跑。但如果只点击父元素，父元素是不会触发监听器的
         </p>
         <div @click="click2" class="size-100" v-bg style="pointer-events: none">
           <button @click="click1" style="pointer-events: auto">click</button>
