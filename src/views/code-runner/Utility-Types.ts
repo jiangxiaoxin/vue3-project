@@ -13,9 +13,9 @@ type Partial2<T> = {
 type partOfPerson = Partial<Person>
 type partOfPerson2 = Partial2<Person>
 
-let a: partOfPerson = {
-  name: undefined
-}
+// let a: partOfPerson = {
+//   name: undefined
+// }
 
 /**
  * ! partOfPerson 是属性可能不在,即使在，值也可能不在
@@ -49,3 +49,36 @@ c.name
 // d.name
 
 // // c = d // error
+
+type aa = {
+  name: string | undefined
+}
+
+type bb = {
+  name: string | null
+}
+
+type cc = {
+  name?: string
+}
+
+// let dd: aa = {} // !error
+
+// let ee: bb = {} // !error
+
+// let ff: cc = {} // ok,name属性可以没有
+
+// let gg: aa = {
+//   name: null // !error
+// }
+
+// let hh: bb = {
+//   name: undefined // !error
+// }
+
+let mm: cc = {
+  name: undefined // ok. name属性的值不存在
+}
+// let nn: cc = {
+//   name: null // !error
+// }
