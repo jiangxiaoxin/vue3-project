@@ -15,7 +15,7 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "css": "vite ./src/css --port 3331",
-    "js": "vite ./src/js --port 4335"
+    "dev:js": "vite ./src/js --port 4335"
   },
   "dependencies": {
     "@vue-office/docx": "^1.6.2",

@@ -78,9 +78,13 @@ func3('fffddd')
 type ObjFunc = (a: number, b: number) => number
 let obj: ObjFunc
 
+
+
 function add(a: number, b: number): number {
   return a + b
 }
+
+
 
 obj = add
 

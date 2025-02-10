@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<style>
+.scroll-container {
+  width: 500px;
+  height: 40px;
+  margin-left: 400px;
+  overflow: hidden;
+  position: relative;
+  background: #f5f5f5;
+}
+
+.scroll-track {
+  position: absolute;
+  white-space: nowrap;
+  will-change: transform;
+  background-color: red;
+}
+</style>
+
+<body>
+<div class="scroll-container">
+  <div class="scroll-track">
+    asdfsdfasdfasdfasdfasdfasdf
+  </div>
+</div>
+
+<script>
+class SeamlessScroller {
+  constructor(container, speed = 50) {
+    this.container = container;
+    this.track = container.querySelector('.scroll-track');
+    this.speed = speed; // 像素/秒
+    this.rafId = null;
+
+    this.distance = null
+    this.track2 = null
+    this.rafId2 = null
+
+    this.scrolling = false
+    this.scrolling2 = false
+
+    this.limit = 0.5
+    
+    this.init();
+    this.startScroll();
+  }
+
+  init() {
+   
+    
+    // 初始化位置
+    this.trackWidth = this.track.offsetWidth;
+    this.containerWidth = this.container.offsetWidth;
+
+    this.distance = this.containerWidth + this.trackWidth
+
+    // this.track.style.left = `${this.containerWidth}px`;
+    this.track.style.left = '0px'
+    this.track.style.transform = `translateX(${this.containerWidth}px)`
+
+    this.track2 = this.track.cloneNode(true)
+    this.track2.style.background = 'blue'
+    this.container.appendChild(this.track2)
+  }
+
+  destory() {
+    if(this.rafId) {
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null
+    }
+    if(this.rafId2) {
+        cancelAnimationFrame(this.rafId2);
+        this.rafId2 = null
+    }
+    this.scrolling = false
+    this.scrolling2 = false
+  }
+
+  startScroll() {
+    let lastTime = performance.now();
+    let position = this.containerWidth;
+    if(this.rafId) {
+        cancelAnimationFrame(this.rafId)
+        this.rafId = null
+    }
+
+    const animate = (now) => {
+      const deltaTime = (now - lastTime) / 1000;
+      lastTime = now;
+      
+      // 计算位移
+      position -= this.speed * deltaTime;
+      console.log("🚀 ~ SeamlessScroller ~ animate ~ position:", position)
+
+
+      if(position < -this.trackWidth * this.limit) {
+        // 已经到0.8了，开启另外一个
+        if(this.scrolling2 === false) {
+            this.startScroll2()
+        }
+        
+      }
+      if(position < -this.trackWidth) {
+        console.log('track1超出全部了');
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null
+        this.track.style.transform = `translateX(${this.containerWidth}px)`
+        this.scrolling = false
+        return
+      }
+
+      this.track.style.transform = `translateX(${position}px)`;
+      this.rafId = requestAnimationFrame(animate);
+    };
+
+    animate(performance.now())
+    this.scrolling = true
+  }
+
+  startScroll2() {
+    let lastTime = performance.now();
+    let position = this.containerWidth;
+    if(this.rafId2) {
+        cancelAnimationFrame(this.rafId2)
+        this.rafId2 = null
+    }
+
+    const animate = (now) => {
+      const deltaTime = (now - lastTime) / 1000;
+      lastTime = now;
+      
+      // 计算位移
+      position -= this.speed * deltaTime;
+
+      if(position < -this.trackWidth * this.limit) {
+        // 已经到0.8了，开启另外一个
+        if(this.scrolling === false) {
+            this.startScroll()
+        }
+        
+      } 
+      if(position < -this.trackWidth) {
+        console.log('track2超出全部了');
+        cancelAnimationFrame(this.rafId2);
+        this.rafId2 = null
+        this.track2.style.transform = `translateX(${this.containerWidth}px)`
+        this.scrolling2 =false
+        return
+      }
+
+      this.track2.style.transform = `translateX(${position}px)`;
+      this.rafId2 = requestAnimationFrame(animate);
+    };
+
+    animate(performance.now())
+    this.scrolling2 =true
+  }
+}
+
+// 初始化
+const container = document.querySelector('.scroll-container');
+new SeamlessScroller(container, 100);
+
+</script>
+</body>
+</html>

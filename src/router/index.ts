@@ -203,11 +203,15 @@ export const config = [
   },
   {
     path: '/guide',
-    component: () => import("../views/后台培训/index.vue")
+    component: () => import('../views/后台培训/index.vue')
   },
   {
     path: '/prepare',
-    component: () => import("../views/prepare/index.vue")
+    component: () => import('../views/prepare/index.vue')
+  },
+  {
+    path: '/svg',
+    component: () => import('../views/svg测试/index.vue')
   }
 ]
 
