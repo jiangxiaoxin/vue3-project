@@ -8,6 +8,12 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 
+for (let index = 0; index < 10; index++) {
+       console.log(index);
+       
+       
+      }
+
 const foo = ref({
   a: {
     b: {

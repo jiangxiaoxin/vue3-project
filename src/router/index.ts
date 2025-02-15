@@ -212,6 +212,14 @@ export const config = [
   {
     path: '/svg',
     component: () => import('../views/svg测试/index.vue')
+  },
+  {
+    path: '/leetcode',
+    component: () => import("../views/leetcode.vue")
+  },
+  {
+    path: '/view',
+    component: () => import("../views/面试点/test1.vue")
   }
 ]
 
