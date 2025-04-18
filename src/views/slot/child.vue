@@ -1,5 +1,5 @@
 <template>
-  <div class="child">
+  <div class="child" style="background-color: blue;">
     <p>child</p>
     <slot :message="msg"></slot>
     <div>父props传递给子 time {{ time }}</div>
@@ -14,7 +14,7 @@ defineProps({
   time: Number
 })
 
-const msg = ref('')
+const msg = ref('aabc')
 
 onUpdated(() => {
   console.log('子更新了')

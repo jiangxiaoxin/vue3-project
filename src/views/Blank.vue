@@ -21,7 +21,7 @@ function pro2() {
   
   setTimeout(() => {
     // reject("result from promise2")
-    throw new Error('error in promise2')
+    // throw new Error('error in promise2')
   }, 2000);
 })
 }

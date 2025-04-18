@@ -38,6 +38,30 @@ export const config = [
     component: () => import('../views/AboutView.vue')
   },
   {
+    path: '/alive1',
+    name: 'alive1',
+    component: () => import('../views/keepAlive/one.vue'),
+    meta: {
+      keepAlive: true
+    }
+  },
+  {
+    path: '/alive2',
+    name: 'alive2',
+    component: () => import('../views/keepAlive/one.vue'),
+    meta: {
+      keepAlive: true
+    }
+  },
+  {
+    path: '/alive3',
+    name: 'alive3',
+    component: () => import('../views/keepAlive/one.vue'),
+    meta: {
+      keepAlive: true
+    }
+  },
+  {
     path: '/directives',
     name: 'directives',
     component: DirectivesView
@@ -214,13 +238,29 @@ export const config = [
     component: () => import('../views/svg测试/index.vue')
   },
   {
-    path: '/leetcode',
-    component: () => import("../views/leetcode.vue")
+    path: '/domapi',
+    component: () => import('../views/domapi/index.vue')
   },
   {
-    path: '/view',
-    component: () => import("../views/面试点/test1.vue")
+    path: '/promise',
+    component: () => import('../views/promise/index.vue')
+  },
+  {
+    path: '/decimal',
+    component: () => import('../views/decimal.vue')
+  },
+  {
+    path: '/speech',
+    component: () => import('../views/speech2.vue')
   }
+  // {
+  //   path: '/leetcode',
+  //   component: () => import('../views/leetcode.vue')
+  // }
+  // {
+  //   path: '/view',
+  //   component: () => import('../views/知识点/test1.vue')
+  // }
 ]
 
 const router = createRouter({
