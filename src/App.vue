@@ -18,6 +18,9 @@
   <div>obj.name:{{ obj1.name }}</div>
   <div @click="addSize">obj.size:{{ obj1.size }}</div> -->
 
+  <!-- <button @click="addWatch">watch</button>
+  <button @click="count++">{{ count }}</button>
+
   <input type="text" v-model="message" />
   <button @click="talk">speack</button>
 
@@ -27,7 +30,7 @@
     <button @click="go3">alive3</button>
     <button @click="go4">alive4</button>
     <button @click="gotoAbout">about</button>
-  </div>
+  </div> -->
 
   <router-view v-slot="{ Component }">
     <keep-alive :include="aliveIncludes">
@@ -66,11 +69,31 @@ console.log(fn())
 import fixedHeight from './views/longList/fixedHeight.vue'
 import testFixedHeightTransform from './views/longList/testFixedHeightTransform.vue'
 import testEstimatedHeightList from './views/longList/testEstimatedHeightList.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch, type WatchHandle } from 'vue'
 
-import VConsole from 'vconsole';
+// import VConsole from 'vconsole';
 
-const vConsole = new VConsole();
+// const vConsole = new VConsole();
+
+const count = ref(100)
+
+let stopWatch: WatchHandle|undefined
+
+const addWatch = () => {
+  if(stopWatch) {
+    stopWatch()
+    stopWatch = undefined
+  }
+ stopWatch =  watch(count, (newVal, oldVal) => {
+    console.log('count', newVal, oldVal);
+  })
+}
+
+
+onMounted(() => {
+  console.log('env', import.meta.env.VITE_VITE_SOME_KEY, import.meta.env);
+  
+})
 
 
 import quality from './quality.vue'

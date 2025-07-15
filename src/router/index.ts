@@ -6,6 +6,7 @@ import PiniaView from '@/views/pinia/index.vue'
 import DialogView from '@/views/dialog/DialogView.vue'
 import { defineAsyncComponent } from 'vue'
 import component from 'element-plus/es/components/tree-select/src/tree-select-option.mjs'
+import mg1 from '@/components/mg1.vue'
 
 export const config = [
   // {
@@ -16,7 +17,7 @@ export const config = [
   {
     path: '/',
     name: 'home',
-    component: BlankView
+    component: HomeView
     // redirect: '/about'
     // redirect: '/home/index',
     // children: [
@@ -189,7 +190,14 @@ export const config = [
   {
     path: '/echart',
     name: 'echart',
-    component: () => import('../views/echart/index.vue')
+    // component: () => import('../views/echart/index.vue')
+    component: () => import("../views/echart/柱状图圆柱形.vue")
+  },
+  {
+    path: '/chart1',
+    name: 'chart1',
+    // component: () => import('../views/echart/index.vue')
+    component: () => import("../views/echart/立体圆柱柱状图.vue")
   },
   {
     path: '/dy',
