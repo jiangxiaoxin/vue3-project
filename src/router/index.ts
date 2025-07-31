@@ -7,6 +7,7 @@ import DialogView from '@/views/dialog/DialogView.vue'
 import { defineAsyncComponent } from 'vue'
 import component from 'element-plus/es/components/tree-select/src/tree-select-option.mjs'
 import mg1 from '@/components/mg1.vue'
+import OffscreenCanvasDemo from '@/views/offscreen-canvas-demo.vue'
 
 export const config = [
   // {
@@ -260,6 +261,26 @@ export const config = [
   {
     path: '/speech',
     component: () => import('../views/speech2.vue')
+  },
+  {
+    path: '/offscreen-canvas',
+    name: 'offscreen-canvas-demo',
+    component: OffscreenCanvasDemo
+  },
+  {
+    path: '/table-footer',
+    name: 'table-footer',
+    component: () => import("@/views/vxe/table-footer.vue")
+  },
+  {
+    path: '/table-footer-custom',
+    name: 'table-footer-custom',
+    component: () => import("@/views/vxe/table-footer-custom.vue")
+  },
+  {
+    path: '/table-merge-cell',
+    name: 'table-merge-cell',
+    component: () => import("@/views/vxe/table-merge-cell.vue")
   }
   // {
   //   path: '/leetcode',

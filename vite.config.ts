@@ -18,6 +18,22 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         about: resolve(__dirname, 'about.html')
+      },
+      output: {
+        // 自定义文件名格式: [name]-[hash]-[version]
+        chunkFileNames: (chunkInfo) => {
+          const version = process.env.BUILD_VERSION || '0.0.0'
+          return `[name]-[hash]-${version}.js`
+        },
+        entryFileNames: (chunkInfo) => {
+          const version = process.env.BUILD_VERSION || '0.0.0'
+          return `[name]-[hash]-${version}.js`
+        },
+        assetFileNames: (assetInfo) => {
+          const version = process.env.BUILD_VERSION || '0.0.0'
+          const ext = assetInfo.name?.split('.').pop() || 'unknown'
+          return `[name]-[hash]-${version}.${ext}`
+        }
       }
     }
   }

@@ -1,10 +1,13 @@
 {
   "name": "vue-project",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "private": true,
   "scripts": {
     "dev": "vite --port 3333 --host",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "node scripts/build.js",
+    "build:patch": "node scripts/build.js patch",
+    "build:minor": "node scripts/build.js minor",
+    "build:major": "node scripts/build.js major",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",

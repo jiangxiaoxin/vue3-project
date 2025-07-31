@@ -9,9 +9,9 @@ const props = defineProps({
 </script>
 
 <template>
-  <vxe-modal @close="close" @cancel="close" width="400" height="400" v-model="modelValue">
+  <!-- <vxe-modal @close="close" @cancel="close" width="400" height="400" v-model="modelValue">
     <button @click="close">关闭</button>
-  </vxe-modal>
+  </vxe-modal> -->
 </template>
 
 <style scoped lang="less"></style>
