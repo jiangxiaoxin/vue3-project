@@ -17,7 +17,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        about: resolve(__dirname, 'about.html')
+        about: resolve(__dirname, 'about.html'),
+        table: resolve(__dirname, "table-canvas.html")
       },
       output: {
         // 自定义文件名格式: [name]-[hash]-[version]

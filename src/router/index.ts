@@ -281,6 +281,26 @@ export const config = [
     path: '/table-merge-cell',
     name: 'table-merge-cell',
     component: () => import("@/views/vxe/table-merge-cell.vue")
+  },
+  {
+    path: '/table-tree',
+    name: 'table-tree',
+    component: () => import("@/views/vxe/table-tree.vue")
+  },
+  {
+    path: '/my-form-item',
+    name: 'my-form-item',
+    component: () => import("@/views/form/my-form-item.vue")
+  },
+  {
+    path: '/group-by',
+    name: 'group-by',
+    component: () => import("@/views/vxe/group-table.vue")
+  },
+  {
+    path: '/table',
+    name: 'table',
+    component: () => import("@/views/konva/demo4.vue")
   }
   // {
   //   path: '/leetcode',
