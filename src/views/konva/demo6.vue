@@ -28,7 +28,7 @@ const containerRef = ref<HTMLDivElement | null>(null)
 // Demo columns: configure pin to 'left' | 'right' | null
 const columns: ColumnDef[] = [
   { key: 'id', title: 'ID', width: 80, pin: 'left', align: 'right' },
-  { key: 'name', title: 'Name', width: 120, pin: 'left' },
+  { key: 'name', title: 'Name', width: 120, pin: null },
   { key: 'age', title: 'Age', width: 80, pin: null, align: 'right' },
   { key: 'gender', title: 'Gender', width: 80, pin: null },
   { key: 'country', title: 'Country', width: 120, pin: null },
@@ -45,12 +45,12 @@ const columns: ColumnDef[] = [
   { key: 'experience', title: 'Experience', width: 100, pin: null, align: 'right' },
   { key: 'education', title: 'Education', width: 120, pin: null },
   { key: 'skills', title: 'Skills', width: 180, pin: null },
-  { key: 'notes', title: 'Notes', width: 200, pin: null },
+  { key: 'notes', title: 'Notes', width: 200, pin: 'right' },
   { key: 'email', title: 'Email', width: 220, pin: 'right' }
 ]
 
 // Demo data with 20 columns, 300 rows
-const data: RowData[] = Array.from({ length: 3000 }, (_, i) => ({
+const data: RowData[] = Array.from({ length: 30000 }, (_, i) => ({
   id: i + 1,
   name: `User ${i + 1}`,
   age: 18 + ((i * 7) % 40),
@@ -140,6 +140,7 @@ let bodyLayer: Konva.Layer | null = null
 let fixedLayer: Konva.Layer | null = null
 let fixedHeaderLayer: Konva.Layer | null = null
 let scrollbarLayer: Konva.Layer | null = null
+let shadowLayer: Konva.Layer | null = null
 
 let centerBodyClipGroup: Konva.Group | null = null
 
@@ -399,6 +400,61 @@ function getFromPool<T extends Konva.Node>(pool: T[], createFn: () => T): T {
 function returnToPool<T extends Konva.Node>(pool: T[], obj: T) {
   obj.remove() // 从场景中移除
   pool.push(obj)
+}
+
+/**
+ * 为固定列添加右边缘阴影效果
+ * @param group 要添加阴影的组
+ * @param cols 列定义数组
+ * @param isHeader 是否为表头区域
+ */
+function createFixedColumnShadow() {
+  if (!stage || !bodyLayer || !headerLayer) return
+
+  // 移除旧的阴影
+  const existingBodyShadow = stage.findOne('.fixedColumnBodyShadow')
+  const existingHeaderShadow = stage.findOne('.fixedColumnHeaderShadow')
+  if (existingBodyShadow) existingBodyShadow.destroy()
+  if (existingHeaderShadow) existingHeaderShadow.destroy()
+
+  // 计算左侧固定列的总宽度
+  const { leftCols } = getSplitColumns()
+  const totalWidth = leftCols.reduce((acc, col) => acc + col.width, 0)
+
+  //console.log(`Creating fixed column shadow, totalWidth: ${totalWidth}`)
+
+  // 创建表头阴影
+  const headerShadowRect = new Konva.Rect({
+    x: totalWidth,
+    y: 0, // 从顶部开始
+    width: 4,
+    height: headerHeight, // 表头高度
+    fill: 'rgba(0, 0, 0, 0.1)',
+    listening: false,
+    name: 'fixedColumnHeaderShadow'
+  })
+
+  // 创建内容区域阴影
+  const stageHeight = stage.height()
+  const bodyShadowRect = new Konva.Rect({
+    x: totalWidth,
+    y: headerHeight, // 从表头下方开始
+    width: 4,
+    height: stageHeight - headerHeight - scrollbarSize, // 覆盖整个内容区域
+    fill: 'rgba(0, 0, 0, 0.1)',
+    listening: false,
+    name: 'fixedColumnBodyShadow'
+  })
+
+  // 将阴影添加到对应的层
+  headerLayer.add(headerShadowRect)
+  bodyLayer.add(bodyShadowRect)
+
+  headerLayer.batchDraw()
+  bodyLayer.batchDraw()
+
+  console.log(`Header shadow created: x=${headerShadowRect.x()}, y=${headerShadowRect.y()}, width=${headerShadowRect.width()}, height=${headerShadowRect.height()}`)
+  console.log(`Body shadow created: x=${bodyShadowRect.x()}, y=${bodyShadowRect.y()}, width=${bodyShadowRect.width()}, height=${bodyShadowRect.height()}`)
 }
 
 function ensureStage() {
@@ -717,6 +773,12 @@ function drawHeaderPart(group: Konva.Group | null, cols: ColumnDef[], startX: nu
 
     x += col.width
   })
+
+  // 表头渲染完成后，如果是左侧表头，创建固定列阴影
+  if (group && group.name() === 'leftHeader') {
+    // 延迟创建阴影，确保所有内容都已渲染
+    setTimeout(() => createFixedColumnShadow(), 0)
+  }
 }
 
 function setupVerticalScrollbarEvents() {
@@ -796,7 +858,10 @@ function drawBodyPartVirtual(group: Konva.Group | null, cols: ColumnDef[], pools
   const children = group.children.slice() // 复制数组避免修改时的问题
   children.forEach((child) => {
     if (child instanceof Konva.Rect) {
-      if (child.fill() && child.fill() !== 'transparent') {
+      // 检查是否为阴影元素
+      if (child.name() === 'fixedColumnShadow') {
+        child.destroy() // 阴影元素直接销毁，不回收到池中
+      } else if (child.fill() && child.fill() !== 'transparent') {
         // 背景矩形
         returnToPool(pools.backgroundRects, child as Konva.Rect)
       } else {
@@ -896,6 +961,8 @@ function drawBodyPartVirtual(group: Konva.Group | null, cols: ColumnDef[], pools
       createHighlightRect(highlightX, highlightY, highlightWidth, rowHeight, group)
     }
   }
+
+  // 阴影现在由createFixedColumnShadow()统一管理，不需要在这里添加
 
   console.log(`Rendered ${visibleRowEnd - visibleRowStart + 1} rows for ${cols.length} columns`)
   console.log(`Group position: x=${group.x()}, y=${group.y()}`)
@@ -1108,6 +1175,9 @@ function handleResize() {
   // Rebuild groups to adjust right pinned x position
   clearGroups()
   rebuildGroups()
+
+  // 重新创建固定列阴影
+  setTimeout(() => createFixedColumnShadow(), 0)
 }
 
 onMounted(() => {
