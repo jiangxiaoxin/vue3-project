@@ -51,8 +51,8 @@
     { key: 'email', title: 'Email', width: 220, pin: 'right' }
   ]
 
-  // Demo data with 20 columns
-  const data: RowData[] = Array.from({ length: 300 }, (_, i) => ({
+  // Demo data with 20 columns, 300 rows
+  const data: RowData[] = Array.from({ length: 3 }, (_, i) => ({
     id: i + 1,
     name: `User ${i + 1}`,
     age: 18 + ((i * 7) % 40),
@@ -172,6 +172,9 @@
     const width = el.clientWidth || 800
     const height = el.clientHeight || 420
 
+    console.log(el.clientWidth, el.clientHeight, '000000000000');
+    
+
     if (!stage) {
       stage = new Konva.Stage({ container: el, width, height })
     } else {
@@ -283,9 +286,9 @@
     // Add fixed columns to fixed layer (on top)
     fixedLayer.add(leftBodyGroup, rightBodyGroup)
 
-    console.log('Left cols:', leftCols.map(c => c.key))
-    console.log('Center cols:', centerCols.map(c => c.key))
-    console.log('Right cols:', rightCols.map(c => c.key))
+    // console.log('Left cols:', leftCols.map(c => c.key))
+    // console.log('Center cols:', centerCols.map(c => c.key))
+    // console.log('Right cols:', rightCols.map(c => c.key))
 
     drawHeaderPart(leftHeaderGroup, leftCols, 0)
     drawHeaderPart(centerHeaderGroup, centerCols, 0)
@@ -731,11 +734,6 @@
   </script>
   
   <style scoped>
-  .konva-demo6 {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
   .stage-container {
     /* Set a fixed demo height; adjust as needed */
     height: 460px;
