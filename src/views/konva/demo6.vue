@@ -52,7 +52,7 @@
   ]
 
   // Demo data with 20 columns, 300 rows
-  const data: RowData[] = Array.from({ length: 3 }, (_, i) => ({
+  const data: RowData[] = Array.from({ length: 30 }, (_, i) => ({
     id: i + 1,
     name: `User ${i + 1}`,
     age: 18 + ((i * 7) % 40),
@@ -124,6 +124,10 @@
   let dragStartX = 0
   let dragStartScrollY = 0
   let dragStartScrollX = 0
+
+  // Cell selection state
+  let selectedCell: { rowIndex: number; colIndex: number; colKey: string } | null = null
+  let highlightRect: Konva.Rect | null = null
   
   // Compute helpers
   function getSplitColumns() {
@@ -186,6 +190,60 @@
 
     tempText.destroy()
     return result || '...'
+  }
+
+  function createHighlightRect(x: number, y: number, width: number, height: number, group: Konva.Group) {
+    // Remove existing highlight
+    if (highlightRect) {
+      highlightRect.destroy()
+      highlightRect = null
+    }
+
+    // console.log('00000000000', x, y);
+
+
+    // Create new highlight rectangle
+    highlightRect = new Konva.Rect({
+      x,
+      y,
+      width,
+      height,
+      fill: 'rgba(66, 165, 245, 0.3)', // Light blue highlight
+      stroke: '#1976d2',
+      strokeWidth: 2,
+      listening: false
+    })
+
+    // Add to the same group as the cell
+    group.add(highlightRect)
+
+    // Move highlight to top within the group
+    highlightRect.moveToTop()
+
+    // Redraw the layer that contains this group
+    const layer = group.getLayer()
+    layer?.batchDraw()
+
+    console.log('Highlight created at:', x, y, 'size:', width, height)
+  }
+
+  function handleCellClick(rowIndex: number, colIndex: number, col: ColumnDef, cellX: number, cellY: number, cellWidth: number, cellHeight: number, group: Konva.Group) {
+    // Update selected cell
+    selectedCell = { rowIndex, colIndex, colKey: col.key }
+
+    // Create highlight rectangle in the same group as the cell
+    createHighlightRect(cellX, cellY, cellWidth, cellHeight, group)
+
+    // Output information to console
+    const rowData = data[rowIndex]
+    console.log('=== Cell Clicked ===')
+    console.log('Row Index:', rowIndex)
+    console.log('Column Index:', colIndex)
+    console.log('Column Key:', col.key)
+    console.log('Column Title:', col.title)
+    console.log('Cell Value:', rowData[col.key])
+    console.log('Row Data:', rowData)
+    console.log('==================')
   }
 
   function getScrollLimits() {
@@ -275,6 +333,10 @@
 
     // Reset centerBodyClipGroup reference
     centerBodyClipGroup = null
+
+    // Reset cell selection
+    selectedCell = null
+    highlightRect = null
   }
 
   function rebuildGroups() {
@@ -300,13 +362,13 @@
       bodyLayer.add(centerBodyClipGroup)
     }
 
-    leftHeaderGroup = new Konva.Group({ x: 0, y: 0 })
-    centerHeaderGroup = new Konva.Group({ x: leftWidth - scrollX, y: 0 })
-    rightHeaderGroup = new Konva.Group({ x: stageWidth - rightWidth - scrollbarSize, y: 0 })
+    leftHeaderGroup = new Konva.Group({ x: 0, y: 0, name: 'leftHeader' })
+    centerHeaderGroup = new Konva.Group({ x: leftWidth - scrollX, y: 0, name: 'centerHeader' })
+    rightHeaderGroup = new Konva.Group({ x: stageWidth - rightWidth - scrollbarSize, y: 0, name: 'rightHeader' })
 
-    leftBodyGroup = new Konva.Group({ x: 0, y: headerHeight - scrollY })
-    centerBodyGroup = new Konva.Group({ x: -scrollX, y: 0 - scrollY })
-    rightBodyGroup = new Konva.Group({ x: stageWidth - rightWidth - scrollbarSize, y: headerHeight - scrollY })
+    leftBodyGroup = new Konva.Group({ x: 0, y: headerHeight - scrollY, name: 'leftBody' })
+    centerBodyGroup = new Konva.Group({ x: -scrollX, y: 0 - scrollY, name: 'centerBody' })
+    rightBodyGroup = new Konva.Group({ x: stageWidth - rightWidth - scrollbarSize, y: headerHeight - scrollY, name: 'rightBody' })
 
     // Add center scrollable header to header layer (lower layer)
     headerLayer.add(centerHeaderGroup)
@@ -547,7 +609,7 @@
     // grid + text
     data.forEach((row, rowIndex) => {
       let x = 0
-      cols.forEach((col) => {
+      cols.forEach((col, colIndex) => {
         const y = rowIndex * rowHeight
         const cell = new Konva.Rect({
           x,
@@ -556,8 +618,21 @@
           height: rowHeight,
           stroke: borderColor,
           strokeWidth: 1,
-          listening: false
+          listening: true, // Enable click events
+          cursor: 'pointer'
         })
+        
+        /**
+         * 原来 click 的回调里直接使用了 x 和y，但这触发了js 中一个致命的错误，
+         * x 值在渲染时，不断累加，最后当触发 click 事件时，x的值被捕获到是最终的值，而不是这个cell 对应的 x 和y。
+         */
+
+        // Add click event to cell
+        cell.on('click', () => {
+          console.log('Cell clicked at:', cell.x(), cell.y(), 'in group:', group.name() || 'unnamed')
+          handleCellClick(rowIndex, colIndex, col, cell.x(), cell.y(), col.width, rowHeight, group)
+        })
+
         group.add(cell)
 
         const value = String(row[col.key] ?? '')
@@ -775,6 +850,8 @@
     fixedHeaderLayer = null
     scrollbarLayer = null
     centerBodyClipGroup = null
+    selectedCell = null
+    highlightRect = null
   })
   </script>
   
