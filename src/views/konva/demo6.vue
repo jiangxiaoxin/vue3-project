@@ -1019,7 +1019,28 @@ function handleMouseMove(e: MouseEvent) {
     const scrollRatio = deltaY / (trackHeight - thumbHeight)
     const newScrollY = dragStartScrollY + scrollRatio * maxScrollY
 
+    const oldScrollY = scrollY
     scrollY = clamp(newScrollY, 0, maxScrollY)
+
+    // 检查是否需要重新渲染虚拟滚动内容
+    const oldVisibleStart = visibleRowStart
+    const oldVisibleEnd = visibleRowEnd
+    calculateVisibleRows()
+
+    const needsRerender = (
+      visibleRowStart !== oldVisibleStart ||
+      visibleRowEnd !== oldVisibleEnd ||
+      Math.abs(scrollY - oldScrollY) > rowHeight * 2
+    )
+
+    if (needsRerender) {
+      // 重新渲染可视区域
+      const { leftCols, centerCols, rightCols } = getSplitColumns()
+      drawBodyPartVirtual(leftBodyGroup, leftCols, leftBodyPools)
+      drawBodyPartVirtual(centerBodyGroup, centerCols, centerBodyPools)
+      drawBodyPartVirtual(rightBodyGroup, rightCols, rightBodyPools)
+    }
+
     updateScrollPositions()
   }
 
