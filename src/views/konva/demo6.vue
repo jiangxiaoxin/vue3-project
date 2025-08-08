@@ -50,7 +50,7 @@ const columns: ColumnDef[] = [
 ]
 
 // Demo data with 20 columns, 300 rows
-const data: RowData[] = Array.from({ length: 30 }, (_, i) => ({
+const data: RowData[] = Array.from({ length: 3000 }, (_, i) => ({
   id: i + 1,
   name: `User ${i + 1}`,
   age: 18 + ((i * 7) % 40),
@@ -847,7 +847,7 @@ function drawBodyPartVirtual(group: Konva.Group | null, cols: ColumnDef[], pools
 
       // 添加点击事件
       cell.on('click', () => {
-        handleCellClick(rowIndex, colIndex, col, rect.x(), rect.y(), col.width, rowHeight, group)
+        handleCellClick(rowIndex, colIndex, col, cell.x(), cell.y(), col.width, rowHeight, group)
       })
       group.add(cell)
 
