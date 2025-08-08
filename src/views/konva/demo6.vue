@@ -649,7 +649,8 @@
           fontFamily: fontFamily,
           fill: bodyTextColor,
           align: 'left',
-          verticalAlign: 'middle'
+          verticalAlign: 'middle',
+          listening: false // 禁用文本的事件监听，让点击事件穿透到下层的cell矩形
         })
         textNode.offsetY(textNode.height() / 2)
         group.add(textNode)
