@@ -25,7 +25,7 @@ import Konva from 'konva'
 
 // 表格配置
 const COLS = 30
-const ROWS = 20
+const ROWS = 500 // 我这台电脑，500以内都还可以
 const CELL_WIDTH = 100
 const CELL_HEIGHT = 50
 const PADDING = 10

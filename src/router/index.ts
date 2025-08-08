@@ -300,7 +300,7 @@ export const config = [
   {
     path: '/table',
     name: 'table',
-    component: () => import("@/views/konva/demo4.vue")
+    component: () => import("@/views/konva/demo6.vue")
   }
   // {
   //   path: '/leetcode',
