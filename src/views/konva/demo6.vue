@@ -224,7 +224,7 @@
     const layer = group.getLayer()
     layer?.batchDraw()
 
-    console.log('Highlight created at:', x, y, 'size:', width, height)
+    // console.log('Highlight created at:', x, y, 'size:', width, height)
   }
 
   function handleCellClick(rowIndex: number, colIndex: number, col: ColumnDef, cellX: number, cellY: number, cellWidth: number, cellHeight: number, group: Konva.Group) {
@@ -236,14 +236,14 @@
 
     // Output information to console
     const rowData = data[rowIndex]
-    console.log('=== Cell Clicked ===')
-    console.log('Row Index:', rowIndex)
-    console.log('Column Index:', colIndex)
-    console.log('Column Key:', col.key)
-    console.log('Column Title:', col.title)
-    console.log('Cell Value:', rowData[col.key])
-    console.log('Row Data:', rowData)
-    console.log('==================')
+    // console.log('=== Cell Clicked ===')
+    // console.log('Row Index:', rowIndex)
+    // console.log('Column Index:', colIndex)
+    // console.log('Column Key:', col.key)
+    // console.log('Column Title:', col.title)
+    // console.log('Cell Value:', rowData[col.key])
+    // console.log('Row Data:', rowData)
+    // console.log('==================')
   }
 
   function getScrollLimits() {
