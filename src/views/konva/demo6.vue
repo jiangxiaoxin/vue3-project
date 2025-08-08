@@ -61,7 +61,7 @@
     city: ['Beijing', 'Shanghai', 'New York', 'London', 'Berlin', 'Paris', 'Tokyo', 'Toronto', 'Sydney'][(i * 5) % 9],
     state: ['CA', 'NY', 'TX', 'FL', 'WA', 'IL', 'PA', 'OH', 'GA', 'NC'][(i * 7) % 10],
     zipcode: `${10000 + (i * 123) % 90000}`,
-    address: `${i + 1} Main Street, Apt ${(i % 50) + 1}`,
+    address: `${i + 1} Main Street, Apt ${(i % 50) + 1}--${i + 1} Main Street, Apt ${(i % 50) + 1}---${i + 1} Main Street, Apt ${(i % 50) + 1}`,
     phone: `+1-555-${String(1000 + i).slice(-4)}`,
     mobile: `+1-666-${String(2000 + i).slice(-4)}`,
     company: ['TechCorp', 'DataSoft', 'CloudInc', 'WebSolutions', 'AppDev', 'SystemsLtd', 'CodeWorks', 'DigitalPro'][(i * 11) % 8],
@@ -149,6 +149,43 @@
   function getTextX(x: number) {
     // Simple left-aligned text with 8px padding
     return x + 8
+  }
+
+  function truncateText(text: string, maxWidth: number, fontSize: number, fontFamily: string): string {
+    // Create a temporary text node to measure text width
+    const tempText = new Konva.Text({
+      text: text,
+      fontSize: fontSize,
+      fontFamily: fontFamily
+    })
+
+    // If text fits within maxWidth, return as is
+    if (tempText.width() <= maxWidth) {
+      tempText.destroy()
+      return text
+    }
+
+    // Binary search to find the maximum number of characters that fit
+    let left = 0
+    let right = text.length
+    let result = ''
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2)
+      const testText = text.substring(0, mid) + '...'
+
+      tempText.text(testText)
+
+      if (tempText.width() <= maxWidth) {
+        result = testText
+        left = mid + 1
+      } else {
+        right = mid - 1
+      }
+    }
+
+    tempText.destroy()
+    return result || '...'
   }
 
   function getScrollLimits() {
@@ -278,9 +315,6 @@
     fixedHeaderLayer.add(leftHeaderGroup, rightHeaderGroup)
 
     // Add center scrollable content to clipped group
-    console.log('Adding centerBodyGroup to centerBodyClipGroup')
-    console.log('centerBodyGroup position:', centerBodyGroup.x(), centerBodyGroup.y())
-    console.log('centerBodyClipGroup position:', centerBodyClipGroup.x(), centerBodyClipGroup.y())
     centerBodyClipGroup.add(centerBodyGroup)
 
     // Add fixed columns to fixed layer (on top)
@@ -424,12 +458,17 @@
       })
       group.add(cell)
 
+      const maxTextWidth = col.width - 16 // 8px padding on each side
+      const fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, Ubuntu'
+      const fontSize = 14
+      const truncatedTitle = truncateText(col.title, maxTextWidth, fontSize, fontFamily)
+
       const label = new Konva.Text({
         x: getTextX(x),
         y: headerHeight / 2,
-        text: col.title,
-        fontSize: 14,
-        fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, Ubuntu',
+        text: truncatedTitle,
+        fontSize: fontSize,
+        fontFamily: fontFamily,
         fill: headerTextColor,
         align: 'left',
         verticalAlign: 'middle'
@@ -522,11 +561,17 @@
         group.add(cell)
 
         const value = String(row[col.key] ?? '')
+        const maxTextWidth = col.width - 16 // 8px padding on each side
+        const fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, Ubuntu'
+        const fontSize = 13
+        const truncatedValue = truncateText(value, maxTextWidth, fontSize, fontFamily)
+
         const textNode = new Konva.Text({
           x: getTextX(x),
           y: y + rowHeight / 2,
-          text: value,
-          fontSize: 13,
+          text: truncatedValue,
+          fontSize: fontSize,
+          fontFamily: fontFamily,
           fill: bodyTextColor,
           align: 'left',
           verticalAlign: 'middle'
