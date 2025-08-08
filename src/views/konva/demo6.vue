@@ -1,4 +1,7 @@
 <template>
+  <div>
+    这个例子支持固定表头，固定左侧，固定右侧，同步滚动功能
+  </div>
     <div class="konva-demo6">
       <div ref="containerRef" class="stage-container"></div>
     </div>
