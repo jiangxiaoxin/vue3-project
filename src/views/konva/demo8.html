@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script>
+      var cn
+      //= document.getElementById('cw');
+      var c
+      var u = 10
+      const m = {
+        x: innerWidth / 2,
+        y: innerHeight / 2
+      }
+
+      var a = []
+      window.onload = function myfunction() {
+        cn = document.getElementById('cw')
+        c = cn.getContext('2d')
+
+        resize()
+        anim()
+
+        cn.onmousemove = function (e) {
+          m.x = e.offsetX
+          m.y = e.offsetY
+        }
+      }
+      function resize() {
+        cn.height = innerHeight
+        cn.width = innerWidth
+        a.push(new ob(innerWidth / 2, innerHeight / 2))
+      }
+      function ob(x, y) {
+        this.x = x
+        this.y = y
+
+        this.draw = function () {
+          const ls = {
+            x: this.x,
+            y: this.y
+          }
+          this.x = m.x 
+          this.y = m.y 
+          c.beginPath()
+          c.lineWidth = 4
+          c.strokeStyle = 'red'
+          c.moveTo(ls.x, ls.y)
+          c.lineTo(this.x, this.y)
+          c.stroke()
+          c.closePath()
+        }
+      }
+      function anim() {
+        requestAnimationFrame(anim)
+        c.fillStyle = 'rgba(0,0,0,0.05)'
+        c.fillRect(0, 0, cn.width, cn.height)
+        
+        a[0].draw()
+      }
+    </script>
+    <style>
+      #cw {
+        position: fixed;
+        z-index: -1;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="cw"></canvas>
+    qwerewr
+  </body>
+</html>

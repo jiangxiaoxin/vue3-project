@@ -301,6 +301,11 @@ export const config = [
     path: '/table',
     name: 'table',
     component: () => import("@/views/konva/demo6.vue")
+  },
+  {
+    path: '/canvas',
+    name: 'canvas',
+    component: () => import("@/views/canvas/index.vue")
   }
   // {
   //   path: '/leetcode',

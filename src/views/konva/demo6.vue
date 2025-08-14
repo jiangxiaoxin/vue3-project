@@ -8,6 +8,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import Konva from 'konva'
+import chalk from "chalk"
 
 type PinDirection = 'left' | 'right' | null
 
@@ -41,16 +42,17 @@ const columns: ColumnDef[] = [
   { key: 'company', title: 'Company', width: 150, pin: null },
   { key: 'department', title: 'Department', width: 120, pin: null },
   { key: 'position', title: 'Position', width: 130, pin: null },
-  { key: 'salary', title: 'Salary', width: 100, pin: null, align: 'right' },
-  { key: 'experience', title: 'Experience', width: 100, pin: null, align: 'right' },
+  
   { key: 'education', title: 'Education', width: 120, pin: null },
   { key: 'skills', title: 'Skills', width: 180, pin: null },
+  { key: 'salary', title: 'Salary', width: 100, pin: null, align: 'right' },
+  { key: 'experience', title: 'Experience', width: 100, pin: null, align: 'right' },
   { key: 'notes', title: 'Notes', width: 200, pin: 'right' },
   { key: 'email', title: 'Email', width: 220, pin: 'right' }
 ]
 
 // Demo data with 20 columns, 300 rows
-const data: RowData[] = Array.from({ length: 30000 }, (_, i) => ({
+const data: RowData[] = Array.from({ length: 1000 }, (_, i) => ({
   id: i + 1,
   name: `User ${i + 1}`,
   age: 18 + ((i * 7) % 40),
@@ -134,6 +136,7 @@ const scrollbarBg = '#f1f1f1'
 const scrollbarThumb = '#c1c1c1'
 const scrollbarThumbHover = '#a8a8a8'
 
+
 let stage: Konva.Stage | null = null
 let headerLayer: Konva.Layer | null = null
 let bodyLayer: Konva.Layer | null = null
@@ -193,19 +196,29 @@ const centerBodyPools: ObjectPools = { cellRects: [], textNodes: [], backgroundR
 const rightBodyPools: ObjectPools = { cellRects: [], textNodes: [], backgroundRects: [] }
 
 // Compute helpers
+
+const sumWidth = (arr: ColumnDef[]) => arr.reduce((acc, c) => acc + c.width, 0)
+
+
+/**
+ * 获取左，中，右3部分列，和对应的宽度
+ */
 function getSplitColumns() {
-  const leftCols = columns.filter((c) => c.pin === 'left')
-  const rightCols = columns.filter((c) => c.pin === 'right')
-  const centerCols = columns.filter((c) => !c.pin)
-  const sumWidth = (arr: ColumnDef[]) => arr.reduce((acc, c) => acc + c.width, 0)
+  const leftCols = columns.filter((c) => c.pin === 'left') //固定左侧的列
+  const rightCols = columns.filter((c) => c.pin === 'right')// 固定右侧的列
+  const centerCols = columns.filter((c) => !c.pin) // 中间的列
+  const leftWidth = sumWidth(leftCols)
+  const rightWidth = sumWidth(rightCols)
+  const centerWidth = sumWidth(centerCols)
+  
   return {
     leftCols,
     centerCols,
     rightCols,
-    leftWidth: sumWidth(leftCols),
-    centerWidth: sumWidth(centerCols),
-    rightWidth: sumWidth(rightCols),
-    totalWidth: sumWidth(columns)
+    leftWidth,
+    centerWidth,
+    rightWidth,
+    totalWidth: leftWidth + rightWidth + centerWidth
   }
 }
 
@@ -217,7 +230,7 @@ function getTextX(x: number) {
   // Simple left-aligned text with 8px padding
   return x + 8
 }
-
+// 截断文本
 function truncateText(
   text: string,
   maxWidth: number,
@@ -236,6 +249,9 @@ function truncateText(
     tempText.destroy()
     return text
   }
+
+  // 利用二分法寻找最合适宽度的文本显示。
+  // 之所以result 得到一个值以后并不停止，而是继续下去，是因为此时result 可能并不是这个宽度能放下的最大的文本量。应该尽量的放下文本
 
   // Binary search to find the maximum number of characters that fit
   let left = 0
@@ -257,7 +273,7 @@ function truncateText(
   }
 
   tempText.destroy()
-  return result || '...'
+  return result
 }
 
 function createHighlightRect(
@@ -319,25 +335,26 @@ function handleCellClick(
     createHighlightRect(cellX, cellY, cellWidth, cellHeight, group)
   } else {
     // 不在可视区域内，清除现有高亮，等待滚动到该位置时重新创建
+    chalk.red("可能走到这里吗") //TODO
     if (highlightRect) {
       highlightRect.destroy()
       highlightRect = null
     }
-    console.log(
-      `Cell selected but not visible. Row ${rowIndex} is outside visible range ${visibleRowStart}-${visibleRowEnd}`
-    )
+    // console.log(
+    //   `Cell selected but not visible. Row ${rowIndex} is outside visible range ${visibleRowStart}-${visibleRowEnd}`
+    // )
   }
 
   // Output information to console
-  const rowData = data[rowIndex]
-  console.log('=== Cell Clicked ===')
-  console.log('Row Index:', rowIndex)
-  console.log('Column Index:', colIndex)
-  console.log('Column Key:', col.key)
-  console.log('Column Title:', col.title)
-  console.log('Cell Value:', rowData[col.key])
-  console.log('Row Data:', rowData)
-  console.log('==================')
+  // const rowData = data[rowIndex]
+  // console.log('=== Cell Clicked ===')
+  // console.log('Row Index:', rowIndex)
+  // console.log('Column Index:', colIndex)
+  // console.log('Column Key:', col.key)
+  // console.log('Column Title:', col.title)
+  // console.log('Cell Value:', rowData[col.key])
+  // console.log('Row Data:', rowData)
+  // console.log('==================')
 }
 
 function getScrollLimits() {
@@ -375,12 +392,12 @@ function calculateVisibleRows() {
   visibleRowStart = Math.max(0, startRow - bufferRows)
   visibleRowEnd = Math.min(data.length - 1, startRow + visibleRowCount + bufferRows)
 
-  console.log(
-    `Virtual scroll: rows ${visibleRowStart}-${visibleRowEnd} (${visibleRowEnd - visibleRowStart + 1} total)`
-  )
-  console.log(
-    `ScrollY: ${scrollY}, StartRow: ${Math.floor(scrollY / rowHeight)}, VisibleRowCount: ${visibleRowCount}`
-  )
+  // console.log(
+  //   `Virtual scroll: rows ${visibleRowStart}-${visibleRowEnd} (${visibleRowEnd - visibleRowStart + 1} total)`
+  // )
+  // console.log(
+  //   `ScrollY: ${scrollY}, StartRow: ${Math.floor(scrollY / rowHeight)}, VisibleRowCount: ${visibleRowCount}`
+  // )
 }
 
 /**
@@ -414,12 +431,22 @@ function createFixedColumnShadow() {
   // 移除旧的阴影
   const existingBodyShadow = stage.findOne('.fixedColumnBodyShadow')
   const existingHeaderShadow = stage.findOne('.fixedColumnHeaderShadow')
-  if (existingBodyShadow) existingBodyShadow.destroy()
-  if (existingHeaderShadow) existingHeaderShadow.destroy()
+
+  // existingBodyShadow?.remove
+
+  // remove is remove, can yse later
+  // destory is remove and dispose, cannot use anymore
+
+  if (existingBodyShadow) {
+    existingBodyShadow.destroy()
+  }
+  if (existingHeaderShadow) {
+    existingHeaderShadow.destroy()
+  }
 
   // 计算左侧固定列的总宽度
-  const { leftCols } = getSplitColumns()
-  const totalWidth = leftCols.reduce((acc, col) => acc + col.width, 0)
+  const { leftCols, leftWidth } = getSplitColumns()
+  const totalWidth = leftWidth // leftCols.reduce((acc, col) => acc + col.width, 0)
 
   //console.log(`Creating fixed column shadow, totalWidth: ${totalWidth}`)
 
@@ -450,20 +477,19 @@ function createFixedColumnShadow() {
   headerLayer.add(headerShadowRect)
   bodyLayer.add(bodyShadowRect)
 
-  headerLayer.batchDraw()
-  bodyLayer.batchDraw()
-
-  console.log(`Header shadow created: x=${headerShadowRect.x()}, y=${headerShadowRect.y()}, width=${headerShadowRect.width()}, height=${headerShadowRect.height()}`)
-  console.log(`Body shadow created: x=${bodyShadowRect.x()}, y=${bodyShadowRect.y()}, width=${bodyShadowRect.width()}, height=${bodyShadowRect.height()}`)
+  //TODO ??? 这里为啥原来要重绘呀。虽然经过虚拟计算，本身要重绘也占用不了多少性能
+  // headerLayer.batchDraw()
+  // bodyLayer.batchDraw()
 }
 
 function ensureStage() {
   const el = containerRef.value
   if (!el) return
-  const width = el.clientWidth || 800
-  const height = el.clientHeight || 420
-
-  console.log(el.clientWidth, el.clientHeight, '000000000000')
+  const width = el.clientWidth
+  const height = el.clientHeight
+  console.log(chalk.bgGreen(el.clientWidth, el.clientHeight, '000000000000'));
+  
+  
 
   if (!stage) {
     stage = new Konva.Stage({ container: el, width, height })
@@ -497,7 +523,8 @@ function ensureStage() {
   }
 
   const { leftWidth, rightWidth } = getSplitColumns()
-  const contentHeight = height - headerHeight - scrollbarSize
+  const contentHeight = height - headerHeight - scrollbarSize // 总的容器高度 - 表头高度 - 水平滚动条高度，就剩下内容区高度
+  const contentWidth = width - leftWidth - rightWidth - scrollbarSize, // 总宽度 - 左右固定列宽度 - 右侧滚动条宽度 = 中间内容区宽度
 
   // Always recreate clipping group for center scrollable content
   centerBodyClipGroup = new Konva.Group({
@@ -506,12 +533,18 @@ function ensureStage() {
     clip: {
       x: 0,
       y: 0,
-      width: width - leftWidth - rightWidth - scrollbarSize,
+      width: contentWidth,
       height: contentHeight
     }
   })
   bodyLayer.add(centerBodyClipGroup)
 }
+
+// 清理对象池
+  const clearPool = (pool: Konva.Node[]) => {
+    pool.forEach((obj) => obj.destroy())
+    pool.length = 0
+  }
 
 function clearGroups() {
   headerLayer?.destroyChildren()
@@ -520,11 +553,7 @@ function clearGroups() {
   fixedHeaderLayer?.destroyChildren()
   scrollbarLayer?.destroyChildren()
 
-  // 清理对象池
-  const clearPool = (pool: Konva.Node[]) => {
-    pool.forEach((obj) => obj.destroy())
-    pool.length = 0
-  }
+  
 
   clearPool(leftBodyPools.cellRects)
   clearPool(leftBodyPools.textNodes)
@@ -555,6 +584,32 @@ function clearGroups() {
   visibleRowCount = 0
 }
 
+/**
+ * Stage (舞台根容器)
+├── headerLayer (表头层 - 最底层)
+│   ├── leftHeaderGroup (左固定表头)
+│   ├── centerHeaderGroup (中间滚动表头)
+│   └── rightHeaderGroup (右固定表头)
+│
+├── bodyLayer (内容层)
+│   ├── centerBodyClipGroup (中间内容裁剪组)
+│   │   └── centerBodyGroup (中间滚动内容)
+│   └── [阴影元素]
+│
+├── fixedLayer (固定列层 - 覆盖在内容层之上)
+│   ├── leftBodyGroup (左固定内容)
+│   └── rightBodyGroup (右固定内容)
+│
+├── fixedHeaderLayer (固定表头层 - 最高优先级)
+│   └── [固定表头内容]
+│
+└── scrollbarLayer (滚动条层 - 最顶层)
+    ├── vScrollbar (垂直滚动条)
+    │   └── vThumb (垂直滚动条滑块)
+    └── hScrollbar (水平滚动条)
+        └── hThumb (水平滚动条滑块)
+ */
+
 function rebuildGroups() {
   if (!stage || !headerLayer || !bodyLayer || !fixedLayer || !fixedHeaderLayer || !scrollbarLayer)
     return
@@ -566,13 +621,15 @@ function rebuildGroups() {
   // Ensure centerBodyClipGroup exists
   if (!centerBodyClipGroup) {
     const contentHeight = stageHeight - headerHeight - scrollbarSize
+    const contentWidth = stageWidth - leftWidth - rightWidth - scrollbarSize
+
     centerBodyClipGroup = new Konva.Group({
-      x: leftWidth,
+      x: leftWidth,//这里xy 坐标是相对于stage的绝对坐标
       y: headerHeight,
       clip: {
         x: 0,
         y: 0,
-        width: stageWidth - leftWidth - rightWidth - scrollbarSize,
+        width: contentWidth,
         height: contentHeight
       }
     })
@@ -580,6 +637,10 @@ function rebuildGroups() {
   }
 
   leftHeaderGroup = new Konva.Group({ x: 0, y: 0, name: 'leftHeader' })
+  // scrollX 初始化时是0，滚动起来以后，表示中间滚动部分向左滚动了多少
+  // 所以对于中间表头的group,它的x 是 leftWidth 这个固定点, 减去滚动的距离
+  // 比如 leftWidth 是100，初始时，scrollX是0，centerHeaderGroup的x就是100
+  // 当scrollX 是100时，向左滚动了100的距离，此时centerHeaderGroup的x就是0，正好到了stage的最左边了，这样显示上让leftHeaderGroup遮盖住
   centerHeaderGroup = new Konva.Group({ x: leftWidth - scrollX, y: 0, name: 'centerHeader' })
   rightHeaderGroup = new Konva.Group({
     x: stageWidth - rightWidth - scrollbarSize,
@@ -587,6 +648,7 @@ function rebuildGroups() {
     name: 'rightHeader'
   })
 
+  // 这个y的计算跟上面中间表头x的计算异曲同工
   leftBodyGroup = new Konva.Group({ x: 0, y: headerHeight - scrollY, name: 'leftBody' })
   centerBodyGroup = new Konva.Group({ x: -scrollX, y: -scrollY, name: 'centerBody' })
   rightBodyGroup = new Konva.Group({
@@ -622,11 +684,13 @@ function rebuildGroups() {
 
   createScrollbars()
 
-  headerLayer.batchDraw()
-  bodyLayer?.batchDraw()
-  fixedLayer?.batchDraw()
-  fixedHeaderLayer?.batchDraw()
-  scrollbarLayer?.batchDraw()
+
+  // TODO ??? 这里为什么调这么多次draw，没啥特殊效果呀
+  // headerLayer.batchDraw()
+  // bodyLayer?.batchDraw()
+  // fixedLayer?.batchDraw()
+  // fixedHeaderLayer?.batchDraw()
+  // scrollbarLayer?.batchDraw()
 }
 
 function createScrollbars() {
@@ -705,7 +769,7 @@ function createScrollbars() {
     hScrollbar.add(hTrack)
 
     const { leftWidth, rightWidth, centerWidth } = getSplitColumns()
-    const visibleWidth = stageWidth - leftWidth - rightWidth - scrollbarSize
+    const visibleWidth = stageWidth - leftWidth - rightWidth - scrollbarSize // 也就是前面计算的contentWidth
     const thumbWidth = Math.max(20, (visibleWidth * visibleWidth) / centerWidth)
     const thumbX = leftWidth + (scrollX / maxScrollX) * (visibleWidth - thumbWidth)
 
@@ -740,6 +804,20 @@ function drawHeaderPart(group: Konva.Group | null, cols: ColumnDef[], startX: nu
   })
   group.add(bg)
 
+
+
+  /**
+   * 这里startX 初始传进来都是0，是因为这些rect 和text 是加在group 上，而group 是已经考虑了他们的位置偏移了
+   */
+
+  /**
+   * 遍历需要绘制的列，每个列都安排好对应的背景rect 和 text
+   * 每绘制一个，x累加width，就是下一个的位置
+   * 
+   * rect的绘制带stroke，这样相邻两个rect 叠加，不是就宽了吗？
+   * 答案就是变宽了，只是因为stroke width 设置的是1，所以不那么明显
+   * 而且这里单纯从说绘制表头的格子来说，也可以用line 去画
+   */
   let x = startX
   cols.forEach((col) => {
     const cell = new Konva.Rect({
@@ -774,6 +852,8 @@ function drawHeaderPart(group: Konva.Group | null, cols: ColumnDef[], startX: nu
     x += col.width
   })
 
+
+  //TODO 我觉得这样不好，shadow 就应该单独调用，而不是跟draw header一起，每次判断name,而且这个create 方法里实际上是画了header和body的阴影
   // 表头渲染完成后，如果是左侧表头，创建固定列阴影
   if (group && group.name() === 'leftHeader') {
     // 延迟创建阴影，确保所有内容都已渲染
@@ -823,26 +903,6 @@ function setupHorizontalScrollbarEvents() {
   })
 }
 
-// /**
-//  * 临时兼容函数 - 重定向到虚拟滚动版本
-//  */
-// function drawBodyPart(group: Konva.Group | null, cols: ColumnDef[]) {
-//   // 根据组确定使用哪个对象池
-//   let pools: ObjectPools
-//   if (group === leftBodyGroup) {
-//     pools = leftBodyPools
-//   } else if (group === centerBodyGroup) {
-//     pools = centerBodyPools
-//   } else if (group === rightBodyGroup) {
-//     pools = rightBodyPools
-//   } else {
-//     // 默认使用center池
-//     pools = centerBodyPools
-//   }
-
-//   drawBodyPartVirtual(group, cols, pools)
-// }
-
 /**
  * 虚拟滚动版本的drawBodyPart - 只渲染可视区域的行
  */
@@ -874,6 +934,8 @@ function drawBodyPartVirtual(group: Konva.Group | null, cols: ColumnDef[], pools
   })
 
   // 渲染可视区域的行
+  // 这里的x和y 的计算很简单，是因为所在的group已经通过scrollx和scrolly来计算好外层统一的移动了
+  // 对于这些单元格来说，他们就是从0，0位置开始延x轴和y轴添加就行了
   for (let rowIndex = visibleRowStart; rowIndex <= visibleRowEnd; rowIndex++) {
     const row = data[rowIndex]
     const y = rowIndex * rowHeight
@@ -962,11 +1024,10 @@ function drawBodyPartVirtual(group: Konva.Group | null, cols: ColumnDef[], pools
     }
   }
 
-  // 阴影现在由createFixedColumnShadow()统一管理，不需要在这里添加
 
-  console.log(`Rendered ${visibleRowEnd - visibleRowStart + 1} rows for ${cols.length} columns`)
-  console.log(`Group position: x=${group.x()}, y=${group.y()}`)
-  console.log(`Group children count: ${group.children.length}`)
+  // console.log(`Rendered ${visibleRowEnd - visibleRowStart + 1} rows for ${cols.length} columns`)
+  // console.log(`Group position: x=${group.x()}, y=${group.y()}`)
+  // console.log(`Group children count: ${group.children.length}`)
 }
 
 function updateVerticalScroll(offsetY: number) {
@@ -985,7 +1046,7 @@ function updateVerticalScroll(offsetY: number) {
     visibleRowEnd !== oldVisibleEnd ||
     Math.abs(scrollY - oldScrollY) > rowHeight * 2 // 滚动超过2行时强制重新渲染
 
-  console.log('🚀 ~ demo6.vue:851 ~ updateVerticalScroll ~ needsRerender:', needsRerender)
+  // console.log('🚀 ~ demo6.vue:851 ~ updateVerticalScroll ~ needsRerender:', needsRerender)
 
   // const needsRerender = true
 
@@ -1006,8 +1067,10 @@ function updateVerticalScroll(offsetY: number) {
   centerBodyGroup.y(centerY)
 
   updateScrollbars()
-  bodyLayer?.batchDraw()
-  fixedLayer?.batchDraw()
+
+  //TODO ???好奇怪，好多处batch draw，但本身又没啥实际作用，不draw 也正常呀
+  // bodyLayer?.batchDraw()
+  // fixedLayer?.batchDraw()
 }
 
 function updateHorizontalScroll(offsetX: number) {
@@ -1070,7 +1133,7 @@ function handleWheel(e: WheelEvent) {
     // Vertical scroll
     updateVerticalScroll(e.deltaY)
 
-    console.log('e.deltaY', e.deltaY)
+    // console.log('e.deltaY', e.deltaY)
   }
 }
 
@@ -1184,7 +1247,7 @@ onMounted(() => {
   ensureStage()
 
   // 初始化虚拟滚动状态
-  calculateVisibleRows()
+  // calculateVisibleRows() // 下面rebuild里面会掉drawBodyPartVirtual，会执行一次calc，那这里就没必要执行了
 
   clearGroups()
   rebuildGroups()
@@ -1216,12 +1279,12 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .stage-container {
   /* Set a fixed demo height; adjust as needed */
   height: 460px;
   width: 100%;
-  border: 1px solid #e5e7eb;
+  //border: 1px solid #e5e7eb;
   background: #fff;
 }
 </style>
