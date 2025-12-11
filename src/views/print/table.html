@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>永不错位的终极方案（分组小表格版）</title>
+    <style>
+      body {
+        font-family: 'Microsoft YaHei', sans-serif;
+        margin: 40px;
+      }
+      .wrapper {
+        width: 900px;
+        margin: 0 auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+        table-layout: fixed; /* 固定表格布局，确保列宽一致 */
+      }
+      /* 统一的列宽设置 */
+      col.department {
+        width: 200px; /* 部门列 */
+      }
+      col.quarter {
+        width: 120px; /* 每个季度列 */
+      }
+      col.subtotal-col {
+        width: 120px; /* 小计列 */
+      }
+      th,
+      td {
+        border: 1px solid #333;
+        padding: 12px;
+        text-align: center;
+      }
+      th {
+        background: #f0f0f0;
+      }
+      .group-title {
+        background: #e3f2fd;
+        font-weight: bold;
+        font-size: 1.1em;
+      }
+      .subtotal {
+        background: #fff3e0;
+        font-weight: bold;
+      }
+      .grandtotal {
+        background: #ffcc80;
+        /* font-weight: bold;
+        font-size: 1.2em; */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- 华北地区小表格 -->
+      <table>
+        <colgroup>
+          <col class="department" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="subtotal-col" />
+        </colgroup>
+        <thead>
+          <tr class="group-title">
+            <th colspan="6">华北地区</th>
+          </tr>
+          <tr>
+            <th rowspan="2">部门</th>
+            <th colspan="4">2025年销售业绩（万元）</th>
+            <th rowspan="2">小计</th>
+          </tr>
+          <tr>
+            <th>1季度</th>
+            <th>2季度</th>
+            <th>3季度</th>
+            <th>4季度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 北京分公司 -->
+          <tr>
+            <td rowspan="5">北京分公司</td>
+            <td>320</td>
+            <td>380</td>
+            <td>410</td>
+            <td>450</td>
+            <td rowspan="5">1560</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>340</td>
+            <td>360</td>
+            <td>430</td>
+            <td>420</td>
+          </tr>
+
+          <!-- 天津分公司 -->
+          <tr>
+            <td rowspan="3">天津分公司</td>
+            <td>280</td>
+            <td>310</td>
+            <td>330</td>
+            <td>350</td>
+            <td rowspan="3">1270</td>
+          </tr>
+          <tr>
+            <td>290</td>
+            <td>320</td>
+            <td>340</td>
+            <td>360</td>
+          </tr>
+          <tr>
+            <td>300</td>
+            <td>300</td>
+            <td>350</td>
+            <td>370</td>
+          </tr>
+
+          <!-- 华北小计 -->
+          <tr class="subtotal">
+            <td>华北地区小计</td>
+            <td>1860</td>
+            <td>2060</td>
+            <td>2280</td>
+            <td>2350</td>
+            <td>8550</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 华南地区小表格 -->
+      <!-- <table>
+        <colgroup>
+          <col class="department" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="subtotal-col" />
+        </colgroup>
+        <thead>
+          <tr class="group-title">
+            <th colspan="6">华南地区</th>
+          </tr>
+          <tr>
+            <th rowspan="2">部门</th>
+            <th colspan="4">2025年销售业绩（万元）</th>
+            <th rowspan="2">小计</th>
+          </tr>
+          <tr>
+            <th>1季度</th>
+            <th>2季度</th>
+            <th>3季度</th>
+            <th>4季度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2">广州分公司</td>
+            <td>450</td>
+            <td>480</td>
+            <td>520</td>
+            <td>550</td>
+            <td rowspan="2">2000</td>
+          </tr>
+          <tr>
+            <td>510</td>
+            <td>530</td>
+            <td>560</td>
+            <td>580</td>
+          </tr>
+
+          <tr>
+            <td rowspan="2">深圳分公司</td>
+            <td>420</td>
+            <td>460</td>
+            <td>490</td>
+            <td>510</td>
+            <td rowspan="2">1880</td>
+          </tr>
+          <tr>
+            <td>440</td>
+            <td>470</td>
+            <td>500</td>
+            <td>520</td>
+          </tr>
+
+          <tr class="subtotal">
+            <td>华南地区小计</td>
+            <td>1820</td>
+            <td>1940</td>
+            <td>2070</td>
+            <td>2160</td>
+            <td>7880</td>
+          </tr>
+        </tbody>
+      </table> -->
+
+      <!-- 公司总计大表格 -->
+      <!-- <table>
+        <colgroup>
+          <col class="department" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="subtotal-col" />
+        </colgroup>
+        <tr class="subtotal">
+          <td>两个公司总计</td>
+          <td>3680</td>
+          <td>4000</td>
+          <td>4350</td>
+          <td>4510</td>
+          <td>16430</td>
+        </tr>
+      </table> -->
+    </div>
+  </body>
+</html>
