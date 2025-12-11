@@ -33,10 +33,24 @@
   </div> -->
 
   <router-view v-slot="{ Component }">
-    <keep-alive :include="aliveIncludes">
-      <component :is="Component" v-if="$route.meta.keepAlive" :key="$route.fullPath" />
-    </keep-alive>
+    <div>
+      {{ $route.meta }}
+    </div>
+
     <component :is="Component" v-if="!$route.meta.keepAlive" />
+    <keep-alive>
+      <component :is="Component" :key="$route.fullPath" v-if="$route.meta.keepAlive"/>
+    </keep-alive>
+    
+    
+    
+    <!-- :include="aliveIncludes" -->
+    <!-- <keep-alive>
+      <div title="keep-alive" v-if="$route.meta.keepAlive">
+        <div style="padding: 10px;border: 1px solid red;">$route.fullPath: {{ $route.fullPath }}</div>
+        <component :is="Component" :key="$route.fullPath" />
+      </div>
+    </keep-alive> -->
   </router-view>
   <!-- <div v-if="!router.currentRoute.value.meta?.keepAlive">
 
@@ -77,14 +91,14 @@ import { onMounted, ref, watch, type WatchHandle } from 'vue'
 
 const count = ref(100)
 
-let stopWatch: WatchHandle|undefined
+let stopWatch: WatchHandle | undefined
 
 const addWatch = () => {
-  if(stopWatch) {
+  if (stopWatch) {
     stopWatch()
     stopWatch = undefined
   }
- stopWatch =  watch(count, (newVal, oldVal) => {
+  stopWatch = watch(count, (newVal, oldVal) => {
     console.log('count', newVal, oldVal);
   })
 }
@@ -92,7 +106,7 @@ const addWatch = () => {
 
 onMounted(() => {
   console.log('env', import.meta.env.VITE_VITE_SOME_KEY, import.meta.env);
-  
+
 })
 
 
@@ -111,8 +125,8 @@ const talk = () => {
   console.log('message', message.value)
   console.log('voices');
   console.log(window.speechSynthesis.getVoices());
-  
-  
+
+
 
   if (window.speechSynthesis.speaking) {
     alert('speechSynthesis.speaking')
@@ -133,13 +147,13 @@ const talk = () => {
     }
 
     utterThis.onerror = function (event) {
-      alert('onerror' + event.error )
+      alert('onerror' + event.error)
       console.log(event)
     }
 
     const voiceName = 'Google 普通话（中国大陆）'
     console.log(window.speechSynthesis.getVoices().find((item) => item.name === voiceName));
-    
+
 
     // utterThis.voice = window.speechSynthesis.getVoices().find((item) => item.name === voiceName)!
     utterThis.pitch = 1

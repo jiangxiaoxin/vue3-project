@@ -4,10 +4,11 @@ import DirectivesView from '@/views/DirectivesView.vue'
 import BlankView from '@/views/Blank.vue'
 import PiniaView from '@/views/pinia/index.vue'
 import DialogView from '@/views/dialog/DialogView.vue'
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, KeepAlive } from 'vue'
 import component from 'element-plus/es/components/tree-select/src/tree-select-option.mjs'
 import mg1 from '@/components/mg1.vue'
 import OffscreenCanvasDemo from '@/views/offscreen-canvas-demo.vue'
+import Login from '@/views/login.vue'
 
 export const config = [
   // {
@@ -18,7 +19,8 @@ export const config = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: Login
+    // component: HomeView
     // redirect: '/about'
     // redirect: '/home/index',
     // children: [
@@ -30,6 +32,13 @@ export const config = [
     //     // component: () => import('../views/AboutView.vue')
     //   }
     // ]
+  },
+  {
+    path: '/user/:id',
+    component: () => import("../views/user.vue"),
+    meta: {
+      keepAlive: true
+    }
   },
   {
     path: '/about',
@@ -101,7 +110,8 @@ export const config = [
   {
     path: '/ref',
     name: 'ref',
-    component: () => import('@/views/ref和reactive/ref')
+    // component: () => import('@/views/ref和reactive/ref')
+    component: () => import('@/views/ref和reactive/对比.vue')
   },
   {
     path: '/reactive',
@@ -232,7 +242,7 @@ export const config = [
   },
   {
     path: '/slot',
-    component: () => import('../views/slot/index.vue')
+    component: () => import('../views/slot/page.vue')
   },
   {
     path: '/guide',
@@ -252,7 +262,7 @@ export const config = [
   },
   {
     path: '/promise',
-    component: () => import('../views/promise/index.vue')
+    component: () => import('../views/promise/sync.vue')
   },
   {
     path: '/decimal',
@@ -300,12 +310,33 @@ export const config = [
   {
     path: '/table',
     name: 'table',
-    component: () => import("@/views/konva/demo6.vue")
+    // component: () => import("@/views/konva/demo6.vue")
+    component: () =>import("@/views/table/index.vue")
   },
   {
     path: '/canvas',
     name: 'canvas',
     component: () => import("@/views/canvas/index.vue")
+  },
+  {
+    path: '/input',
+    name: 'input',
+    component: () => import("@/views/input/index.vue")
+  },
+  {
+    path: '/queue',
+    name: 'queue',
+    component: () => import("@/views/queue.vue")
+  },
+  {
+    path: '/scan-queue',
+    name: 'scan-queue',
+    component: () => import("@/views/scan-queue.vue")
+  },
+  {
+    path:'/ble',
+    name:'ble',
+    component: () => import("@/views/ble/index.vue")
   }
   // {
   //   path: '/leetcode',

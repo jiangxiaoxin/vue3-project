@@ -1,6 +1,6 @@
 import './assets/main.css'
 
-import { createApp } from 'vue'
+import { createApp, onMounted } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
@@ -25,6 +25,7 @@ import VXETable from 'vxe-table'
 import 'vxe-table/lib/style.css'
 import ExcelJS from 'exceljs'
 import VXETablePluginExportXLSX from 'vxe-table-plugin-export-xlsx'
+import "/public/tt.js"
 
 const zindex = useZIndex()
 // console.log(
@@ -87,3 +88,8 @@ VXETable.use(VXETablePluginExportXLSX, {
 app.use(VXETable)
 
 app.mount('#app')
+
+console.log('main.ts==========');
+
+
+

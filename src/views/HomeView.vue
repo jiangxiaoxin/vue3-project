@@ -1,4 +1,21 @@
 <template>
+
+<button @click="exportPdf">导出PDF</button>
+<div class="export-container">
+  <div id="chart" style="width: 600px; height: 400px;"></div>
+  <div>
+    <input type="text" ref="inputRefs"></input>
+  </div>
+
+  <div>
+    <input type="text" ref="inputRefs"></input>
+  </div>
+
+  <div>
+    <button @click="changeArr">修改</button>
+  </div>
+
+
   <glo />
   <button @click="print">打印表格1111111111111111</button>
   <div id="printTable" style="color:red;">
@@ -55,17 +72,60 @@
     </table>
   </div>
   <button @click="print2">打印222222222</button>
+  <div v-for="item in 20" :key="item" style="height: 100px;border-bottom: 1px solid #333;box-sizing: border-box;background-color: red;color: white;">
+    title:{{ item }}
+  </div>
 
-  <!-- <main>
-    <TheWelcome />
-  </main> -->
   <div class="router-view-cls">
     <RouterView />
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
 import TheWelcome from '../components/TheWelcome.vue'
+import { isRef, onMounted, ref, watch } from "vue"
+import { jsPDF } from "jspdf"
+import html2canvas from "html2canvas"
+import * as echarts from 'echarts';
+
+const inputRefs = ref([])
+
+onMounted(() => {
+  console.log('inputRefs11111', inputRefs.value);
+  initChart()
+})
+
+const initChart = () => {
+  const chart = echarts.init(document.getElementById('chart'))
+  const option = {
+    xAxis: {
+    type: 'category',
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      data: [150, 230, 224, 218, 135, 147, 260],
+      type: 'line'
+    }
+  ]
+  }
+  chart.setOption(option)
+}
+
+const arr = ref<number[]>([])
+const changeArr = () => {
+  arr.value = [1,2,3]
+}
+
+watch([arr], (newVal) => {
+  console.log("🚀 ~ newVal:", newVal[0]) // just proxy, not ref
+
+  
+})
 
 
 const print = () => {
@@ -123,5 +183,64 @@ const print2 = () => {
   // win.onafterprint = () => {
   //   win.close();
   // }
+}
+
+const exportPdf = async () => {
+  try {
+    const target = document.body
+    const totalWidth = document.documentElement.scrollWidth
+    const totalHeight = document.documentElement.scrollHeight
+
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: totalWidth,
+      windowHeight: totalHeight,
+    })
+
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = pdf.internal.pageSize.getHeight()
+
+    const pxPerMm = canvas.width / pdfWidth
+    const pageHeightPx = Math.floor(pdfHeight * pxPerMm)
+
+    let y = 0
+    let pageIndex = 0
+    const pageCanvas = document.createElement('canvas')
+    pageCanvas.width = canvas.width
+    const pageCtx = pageCanvas.getContext('2d')!
+
+    while (y < canvas.height) {
+      const sliceHeight = Math.min(pageHeightPx, canvas.height - y)
+      pageCanvas.height = sliceHeight
+      pageCtx.clearRect(0, 0, pageCanvas.width, sliceHeight)
+      pageCtx.drawImage(
+        canvas,
+        0,
+        y,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight
+      )
+
+      const imgData = pageCanvas.toDataURL('image/png', 1.0)
+      if (pageIndex > 0) pdf.addPage()
+      const sliceHeightMm = sliceHeight / pxPerMm
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, sliceHeightMm, undefined, 'FAST')
+      y += sliceHeight
+      pageIndex++
+    }
+
+    pdf.save('page.pdf')
+  } catch (err) {
+    console.error('Export PDF failed:', err)
+  }
 }
 </script>
