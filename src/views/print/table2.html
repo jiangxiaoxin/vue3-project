@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>动态表格生成（分组小表格版）</title>
+    <style>
+      body {
+        font-family: 'Microsoft YaHei', sans-serif;
+        margin: 40px;
+      }
+      .wrapper {
+        width: 900px;
+        margin: 0 auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+        table-layout: fixed; /* 固定表格布局，确保列宽一致 */
+      }
+      /* 统一的列宽设置 */
+      col.department {
+        width: 200px; /* 部门列 */
+      }
+      col.quarter {
+        width: 120px; /* 每个季度列 */
+      }
+      col.subtotal-col {
+        width: 120px; /* 小计列 */
+      }
+      th,
+      td {
+        border: 1px solid #333;
+        padding: 12px;
+        text-align: center;
+      }
+      th {
+        background: #f0f0f0;
+      }
+      .group-title {
+        background: #e3f2fd;
+        font-weight: bold;
+        font-size: 1.1em;
+      }
+      .subtotal {
+        background: #fff3e0;
+        font-weight: bold;
+      }
+      .grandtotal {
+        background: #ffcc80;
+      }
+
+      @media print {
+        /* 在每个表格前分页（第一个除外） */
+        table:not(:first-of-type) {
+          page-break-before: always;
+          break-before: page;
+        }
+
+        /* 防止表格被分页截断 */
+        table {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        /* 防止表头与表体分离 */
+        thead {
+          display: table-header-group;
+        }
+
+        tbody {
+          display: table-row-group;
+        }
+
+        /* 防止行被截断 */
+        tr {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper" id="tableContainer">
+      <!-- 表格将通过 JavaScript 动态生成 -->
+    </div>
+
+    <script>
+      // 生成测试数据
+      const tableData = [];
+
+      for (let i = 0; i < 18; i++) {
+        tableData.push({
+          id: i + 1,
+          department: '北京分公司',
+          quarter1: 320,
+          quarter2: 380,
+          quarter3: 410,
+          quarter4: 450,
+          subtotal: 1560
+        });
+      }
+
+      for (let i = 0; i < 13; i++) {
+        tableData.push({
+          id: i + 1,
+          department: '天津分公司',
+          quarter1: 280,
+          quarter2: 310,
+          quarter3: 330,
+          quarter4: 350,
+          subtotal: 1270
+        });
+      }
+
+      for (let i = 0; i < 4; i++) {
+        tableData.push({
+          id: i + 1,
+          department: '济南分公司',
+          quarter1: 450,
+          quarter2: 480,
+          quarter3: 520,
+          quarter4: 550,
+          subtotal: 2000
+        });
+      }
+
+      /**
+       * 将数组按指定大小分组
+       * @param {Array} array - 要分组的数组
+       * @param {number} size - 每组的大小
+       * @returns {Array} 分组后的二维数组
+       */
+      function chunkArray(array, size) {
+        const chunks = [];
+        for (let i = 0; i < array.length; i += size) {
+          chunks.push(array.slice(i, i + size));
+        }
+        return chunks;
+      }
+
+      /**
+       * 按部门分组数据
+       * @param {Array} data - 数据数组
+       * @returns {Object} 按部门分组的数据对象
+       */
+      function groupByDepartment(data) {
+        const grouped = {};
+        data.forEach(item => {
+          if (!grouped[item.department]) {
+            grouped[item.department] = [];
+          }
+          grouped[item.department].push(item);
+        });
+        return grouped;
+      }
+
+      /**
+       * 计算小计
+       * @param {Array} data - 数据数组
+       * @returns {Object} 包含各季度和小计的对象
+       */
+      function calculateSubtotal(data) {
+        return data.reduce(
+          (acc, item) => {
+            acc.quarter1 += item.quarter1;
+            acc.quarter2 += item.quarter2;
+            acc.quarter3 += item.quarter3;
+            acc.quarter4 += item.quarter4;
+            acc.total += item.subtotal;
+            return acc;
+          },
+          { quarter1: 0, quarter2: 0, quarter3: 0, quarter4: 0, total: 0 }
+        );
+      }
+
+      /**
+       * 生成表格HTML
+       * @param {Array} data - 该表格的数据
+       * @param {number} tableIndex - 表格索引（从0开始）
+       * @returns {string} 表格HTML字符串
+       */
+      function generateTable(data, tableIndex) {
+        if (data.length === 0) return '';
+
+        // 按部门分组
+        const groupedData = groupByDepartment(data);
+        const departments = Object.keys(groupedData);
+
+        // 计算该表格的小计
+        const subtotal = calculateSubtotal(data);
+
+        // 生成表头
+        let html = `
+      <table>
+        <colgroup>
+          <col class="department" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="quarter" />
+          <col class="subtotal-col" />
+        </colgroup>
+        <thead>
+          <tr class="group-title">
+            <th colspan="6">数据表格 ${tableIndex + 1}</th>
+          </tr>
+          <tr>
+            <th rowspan="2">部门</th>
+            <th colspan="4">2025年销售业绩（万元）</th>
+            <th rowspan="2">小计</th>
+          </tr>
+          <tr>
+            <th>1季度</th>
+            <th>2季度</th>
+            <th>3季度</th>
+            <th>4季度</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+        // 生成数据行
+        departments.forEach((dept, deptIndex) => {
+          const deptData = groupedData[dept];
+          console.log("🚀 ~ table2.html:225 ~ generateTable ~ deptData:", deptData)
+
+          const rowCount = deptData.length;
+          const deptSubtotal = calculateSubtotal(deptData);
+
+          deptData.forEach((item, itemIndex) => {
+            if (itemIndex === 0) {
+              // 第一行，显示部门名称和小计（合并单元格）
+              html += `
+          <tr>
+            <td rowspan="${rowCount}">${dept}</td>
+            <td>${item.quarter1}</td>
+            <td>${item.quarter2}</td>
+            <td>${item.quarter3}</td>
+            <td>${item.quarter4}</td>
+            <td rowspan="${rowCount}">${deptSubtotal.total}</td>
+          </tr>`;
+            } else {
+              // 后续行，不显示部门和小计
+              html += `
+          <tr>
+            <td>${item.quarter1}</td>
+            <td>${item.quarter2}</td>
+            <td>${item.quarter3}</td>
+            <td>${item.quarter4}</td>
+          </tr>`;
+            }
+          });
+        });
+
+        // 添加小计行
+        html += `
+          <tr class="subtotal">
+            <td>本表格小计</td>
+            <td>${subtotal.quarter1}</td>
+            <td>${subtotal.quarter2}</td>
+            <td>${subtotal.quarter3}</td>
+            <td>${subtotal.quarter4}</td>
+            <td>${subtotal.total}</td>
+          </tr>
+        </tbody>
+      </table>`;
+
+        return html;
+      }
+
+      /**
+       * 渲染所有表格
+       */
+      function renderTables() {
+        const container = document.getElementById('tableContainer');
+        const MAX_ROWS_PER_TABLE = 10;
+
+        // 将数据按每10条分组
+        const dataChunks = chunkArray(tableData, MAX_ROWS_PER_TABLE);
+
+        // 生成所有表格
+        let allTablesHTML = '';
+        dataChunks.forEach((chunk, index) => {
+          allTablesHTML += generateTable(chunk, index);
+        });
+
+        container.innerHTML = allTablesHTML;
+      }
+
+      // 页面加载完成后渲染表格
+      document.addEventListener('DOMContentLoaded', renderTables);
+    </script>
+  </body>
+</html>
+

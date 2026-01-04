@@ -19,19 +19,19 @@ export const config = [
   {
     path: '/',
     name: 'home',
-    component: Login
-    // component: HomeView
+    // component: Login
+    // component: HomeView,
     // redirect: '/about'
-    // redirect: '/home/index',
-    // children: [
-    //   {
-    //     path: '/home/index',
-    //     name: 'homex',
-    //     // component: defineAsyncComponent(() => import('@/views/HomeX.vue'))
-    //     component: () => import('@/views/HomeX.vue')
-    //     // component: () => import('../views/AboutView.vue')
-    //   }
-    // ]
+    redirect: '/home/index',
+    children: [
+      {
+        path: '/home/index',
+        name: 'homex',
+        // component: defineAsyncComponent(() => import('@/views/HomeX.vue'))
+        component: () => import('@/views/HomeX.vue')
+        // component: () => import('../views/AboutView.vue')
+      }
+    ]
   },
   {
     path: '/user/:id',
@@ -202,7 +202,8 @@ export const config = [
     path: '/echart',
     name: 'echart',
     // component: () => import('../views/echart/index.vue')
-    component: () => import("../views/echart/柱状图圆柱形.vue")
+    // component: () => import("../views/echart/柱状图圆柱形.vue")
+    component: () => import("../views/echart/折线图带特殊标志.vue")
   },
   {
     path: '/chart1',
@@ -337,7 +338,7 @@ export const config = [
     path:'/ble',
     name:'ble',
     component: () => import("@/views/ble/index.vue")
-  }
+  },
   // {
   //   path: '/leetcode',
   //   component: () => import('../views/leetcode.vue')
@@ -346,6 +347,7 @@ export const config = [
   //   path: '/view',
   //   component: () => import('../views/知识点/test1.vue')
   // }
+
 ]
 
 const router = createRouter({

@@ -51,6 +51,32 @@
         /* font-weight: bold;
         font-size: 1.2em; */
       }
+
+      @media print {
+        /* 在每个表格前分页【这个有效】 */
+        table {
+          page-break-before: always;
+          break-before: page;
+        }
+
+        /* 没用？？ */
+        /* table {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        } */
+
+        /* 第一个表格不需要分页 */
+        table:first-of-type {
+          page-break-before: auto;
+          break-before: auto;
+        }
+
+        /* 在小计行后分页【这个方式有效】 */
+        /* .subtotal {
+          page-break-before: always;
+          break-before: page;
+        } */
+      }
     </style>
   </head>
   <body>
@@ -84,12 +110,60 @@
         <tbody>
           <!-- 北京分公司 -->
           <tr>
-            <td rowspan="5">北京分公司</td>
+            <td rowspan="13">北京分公司</td>
             <td>320</td>
             <td>380</td>
             <td>410</td>
             <td>450</td>
-            <td rowspan="5">1560</td>
+            <td rowspan="13">1560</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>350</td>
+            <td>390</td>
+            <td>420</td>
+            <td>400</td>
           </tr>
           <tr>
             <td>350</td>
@@ -238,5 +312,49 @@
         </tr>
       </table> -->
     </div>
+
+    <script>
+        const tableData = [
+            
+        ]
+
+        for(let i = 0; i < 18; i++) {
+            tableData.push({
+                id: i + 1,
+                department: '北京分公司',
+                quarter1: 320,
+                quarter2: 380,
+                quarter3: 410,
+                quarter4: 450,
+                subtotal: 1560
+            })
+        }
+
+        for(let i = 0; i < 13; i++) {
+            tableData.push({
+                id: i + 1,
+                department: '天津分公司',
+                quarter1: 280,
+                quarter2: 310,
+                quarter3: 330,
+                quarter4: 350,
+                subtotal: 1270
+            })
+        }
+
+        for(let i=0; i<4; i++) {
+            tableData.push({
+                id: i + 1,
+                department: '济南分公司',
+                quarter1: 450,
+                quarter2: 480,
+                quarter3: 520,
+                quarter4: 550,
+                subtotal: 2000
+            })
+        }
+
+
+    </script>
   </body>
 </html>
