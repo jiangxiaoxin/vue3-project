@@ -7,7 +7,7 @@
     >
       <component 
         :is="item.component" 
-        v-bind="getProps(item)"
+        v-bind="item.props"
         v-on="item.events"
       />
     </WrapperComponent>
@@ -15,11 +15,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onUpdated } from 'vue'
 import WrapperComponent from './WrapperComponent.vue'
 import { ElInput, ElButton } from 'element-plus'
 import 'element-plus/es/components/input/style/css'
 import 'element-plus/es/components/button/style/css'
+
+onUpdated(() => {
+  console.log("updated");
+  
+})
 
 // 组件名称到组件的映射
 const componentMap: Record<string, unknown> = {
@@ -29,13 +34,13 @@ const componentMap: Record<string, unknown> = {
 
 interface ComponentItem {
   component: unknown
-  props?: Record<string, unknown> | (() => Record<string, unknown>)
+  props?: Record<string, unknown>
   events?: Record<string, unknown>
 }
 
 interface ConfigItem {
   name: string
-  props?: Record<string, unknown> | (() => Record<string, unknown>)
+  props?: Record<string, unknown>
   events?: Record<string, unknown>
 }
 
@@ -57,13 +62,6 @@ const componentList = computed<ComponentItem[]>(() => {
     return { component, props: componentProps, events: componentEvents }
   })
 })
-
-// 获取 props，如果是函数则执行
-const getProps = (item: ComponentItem) => {
-    console.log("🚀 ~ getProps ~ getProps:")
-  return typeof item.props === 'function' ? item.props() : item.props
-}
-
 </script>
 
 <style scoped>

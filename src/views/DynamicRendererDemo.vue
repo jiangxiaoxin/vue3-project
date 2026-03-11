@@ -1,6 +1,10 @@
 <template>
   <div class="demo-container">
+
+    
     <h2>动态渲染示例</h2>
+
+    <MainComp />
     
     <h3>简单配置</h3>
     <DynamicRenderer :config="simpleConfig" />
@@ -10,14 +14,15 @@
 
     
     
-    <h3>带事件配置{{ inputValue }}</h3>
+    <h3>带事件配置{{ inputState.value }}</h3>
     <DynamicRenderer :config="configWithEvents" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, reactive } from "vue"
 import DynamicRenderer from '@/components/DynamicRenderer.vue'
+import MainComp from "./ref和reactive/main.vue"
 
 // 简单配置
 const simpleConfig = ['input', 'button', 'input']
@@ -30,25 +35,38 @@ const configWithProps = [
   { name: 'button', props: { type: 'danger', plain: true } },
 ]
 
-// 使用 ref 存储输入值
-const inputValue = ref('')
+// 使用 reactive 对象，直接传递引用
+const inputState = reactive({
+  value: 'haha'
+})
 
-// 使用函数返回 props，保持配置数组稳定，只有 props 动态计算
+// 配置只创建一次，props 是响应式对象的引用，但这样修改后，虽然事件能回调回来，但不会重新传props，导致内部的input 没有收到新数据了
+// 问题的关键就是 configWithEvents 是个普通对象。姜内部的props 封装成响应式的，或者将这个config 都改成响应式的，也能触发
 const configWithEvents = [
   { 
     name: 'input', 
-    props: () => ({ 
+    props: {
       placeholder: '输入后点击按钮查看值',
-      modelValue: inputValue.value 
-    }),
+      modelValue: inputState.value
+    },
+    
+    // props: reactive({
+    //   placeholder: '输入后点击按钮查看值',
+    //   get modelValue() { return inputState.value },
+    //   set modelValue(val) { inputState.value = val }
+    // }),
     events: { 
-      'update:modelValue': (val: string) => { inputValue.value = val } 
+      'update:modelValue': (val: string) => { 
+        console.log('能掉回来');
+        
+        inputState.value = val
+       } 
     }
   },
   { 
     name: 'button', 
     props: { type: 'primary' },
-    events: { click: () => alert('Primary button clicked, value:' + inputValue.value) }
+    events: { click: () => alert('Primary button clicked, value:' + inputState.value) }
   },
   { 
     name: 'button', 
