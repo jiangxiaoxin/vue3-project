@@ -1,5 +1,14 @@
 <template>
+
+  <div style="background-color: red;height: 300px;display: flex;flex-direction: column;overflow: auto;">
+    <div v-for="item in 30" :key="item" style="height: 1vw;font-size: 3vw;background-color: blue;flex-shrink: 0;">
+      <span style="color: black;">item-{{ item }}</span>
+    </div>
+  </div>
   <div class="about" v-container>
+    <div>reactive data: {{ dataObj.time  }}</div>
+    <button @click="handleAssignData">assign data</button>
+    <button @click="handleChangeData">change data</button>
     <div>
       parent
       <div>child</div>
@@ -26,11 +35,23 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, provide, ref } from 'vue'
+import { inject, onMounted, provide, reactive, ref } from 'vue'
 import ProvideInject from './provideinject.vue'
 import scrollView from './scrollView.vue'
 import axios from 'axios'
 const globalMsg = inject('globalMsg')
+
+const dataObj = reactive({
+  time: Date.now()
+})
+
+const handleAssignData = () => {
+  Object.assign(dataObj, {time: Date.now()})
+}
+
+const handleChangeData = () => {
+  dataObj.time = Math.random()
+}
 
 const tableData = ref([])
 onMounted(() => {

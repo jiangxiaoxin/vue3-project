@@ -28,8 +28,8 @@ export const config = [
         path: '/home/index',
         name: 'homex',
         // component: defineAsyncComponent(() => import('@/views/HomeX.vue'))
-        component: () => import('@/views/HomeX.vue')
-        // component: () => import('../views/AboutView.vue')
+        // component: () => import('@/views/HomeX.vue')
+        component: () => import('../views/AboutView.vue')
       }
     ]
   },
@@ -339,6 +339,11 @@ export const config = [
     name:'ble',
     component: () => import("@/views/ble/index.vue")
   },
+  {
+    path: '/dyna',
+    name: 'dyna',
+    component: () => import("@/views/DynamicRendererDemo.vue")
+  }
   // {
   //   path: '/leetcode',
   //   component: () => import('../views/leetcode.vue')

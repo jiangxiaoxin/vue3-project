@@ -4,18 +4,42 @@
       <button @click="logData">data</button>
     </div>
 
-    <div class="list" v-for="day in WeeklyArray" :key="day.id">
-      <h1 style="border: 1px solid red; color: red">{{ day.name }}</h1>
-      <draggable :list="filterArray(day)" item-key="id" group="a" @add="addTo">
+    <!-- <div class="list" v-for="day in WeeklyArray" :key="day.id">
+      <h1 style="border: 1px solid red; color: red">
+        {{ day.name }}
+        <button @click="showData(list)">show data</button>
+      </h1>
+      <draggable :list="list" item-key="id" group="a" @add="addTo">
         <template #item="{ element }">
-          <div class="item">{{ element.id }} --- {{ element.name }}</div>
+          <div class="item">
+            <div>{{ element }}</div>
+          </div>
         </template>
       </draggable>
-    </div>
-    <div class="list">
-      <draggable v-model="list2" item-key="id" group="a">
+    </div> -->
+
+    <h1 style="border: 1px solid red; color: red">
+        group a
+        <button @click="showData(list)">show data</button>
+      </h1>
+      <!-- group name 组的名称 put，可以从别的group往当前这个group里拖 pull 可以从当前组往外拖 clone 往外拖的时候，复制一份数据，自己还是子对象还是原来的数量 -->
+      <draggable :list="list" item-key="id" :group="{name: 'a', put: 'b', pull: 'clone'}" @add="addTo" :sort="false">
         <template #item="{ element }">
-          <div class="item">{{ element.id }} --- {{ element.name }}</div>
+          <div class="item">
+            <div>{{ element }}</div>
+          </div>
+        </template>
+      </draggable>
+    <div class="list">
+      <button @click="showData(list2)">showdata</button>
+      <draggable v-model="list2" item-key="id" :group="{name: 'b', put: 'a', pull: false}">
+        
+        <template #item="{ element }">
+          
+          <div class="item">
+            <div>{{ element }}</div>
+            <button @click="showData(element)">show data</button>
+          </div>
         </template>
       </draggable>
     </div>
@@ -33,10 +57,10 @@ const WeeklyArray = ref([
     id: 2,
     name: '星期二'
   },
-  {
-    id: 3,
-    name: '星期三'
-  }
+  // {
+  //   id: 3,
+  //   name: '星期三'
+  // }
 ])
 
 const list = ref([
@@ -68,6 +92,11 @@ const list2 = ref([
     day: 3
   }
 ])
+
+const showData = (element)  => {
+  console.table(element);
+  
+}
 
 const filterArray = (day) => {
   console.log('🚀 ~ filterArray ~ day:', day)
@@ -101,6 +130,7 @@ const addTo = (evt) => {
 }
 
 .list + .list {
-  margin-top: 100px;
+  margin-top: 20px;
+  border-top: 10px solid red;
 }
 </style>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内嵌在iframe里</title>
+</head>
+<body>
+    <div>内嵌在iframe里</div>
+    <button id="btn1">location = 百度</button>
+    <button id="btn2">parent.location = 百度</button>
+    <script>
+        document.getElementById('btn1').onclick = function () {
+            window.location.href = 'https://www.baidu.com'
+        }
+        document.getElementById('btn2').onclick = function () {
+            window.parent.location.href = 'https://www.baidu.com'
+        }
+        console.log('iframe 里', window.top == window.self);
+        
+    </script>
+</body>
+</html>
+    </script>
+</body>
+</html>
