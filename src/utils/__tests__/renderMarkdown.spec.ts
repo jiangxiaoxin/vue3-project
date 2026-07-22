@@ -29,4 +29,22 @@ describe('renderMarkdown', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('安全文本')
   })
+
+  it('renders inline and block math with KaTeX', () => {
+    const html = renderMarkdown('能量公式 $E=mc^2$\n\n$$\\frac{a}{b}$$')
+
+    expect(html).toContain('katex')
+    expect(html).not.toContain('$E=mc^2$')
+    expect(html).toContain('mc')
+    expect(html).toContain('frac')
+  })
+
+  it('renders chemical formulas with mhchem', () => {
+    const html = renderMarkdown('水分子：$\\ce{H2O}$')
+
+    expect(html).toContain('katex')
+    expect(html).not.toContain('\\ce{H2O}')
+    expect(html).toMatch(/H/)
+    expect(html).toMatch(/O/)
+  })
 })

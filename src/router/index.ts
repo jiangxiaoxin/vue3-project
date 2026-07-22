@@ -358,6 +358,7 @@ export const config = [
     component: () => import('@/views/routeAB/B.vue')
   },
   {
+    // OpenAI 兼容流式聊天试验页：浏览器直连第三方 Base URL + API Key。
     path: '/openai',
     name: 'openai',
     component: () => import('@/views/openai/index.vue')

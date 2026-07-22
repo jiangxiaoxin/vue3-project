@@ -1,5 +1,12 @@
 <template>
+  <!--
+    OpenAI 流式聊天页结构：
+    1. header.config-panel：临时配置区（不持久化）
+    2. section.message-list：消息列表（助手消息 v-html 渲染 Markdown/公式）
+    3. footer.composer-panel：输入、提交、历史开关、错误提示
+  -->
   <main class="chat-shell">
+    <!-- 顶部：Base URL / API Key；仅保存在当前组件实例内存中 -->
     <header class="config-panel">
       <div class="brand-block">
         <span class="eyebrow">STREAM CONSOLE</span>
@@ -35,6 +42,7 @@
       </p>
     </header>
 
+    <!-- 中部：动态消息列表；aria-live 便于读屏感知流式更新 -->
     <section ref="messageList" class="message-list" aria-live="polite">
       <div v-if="messages.length === 0" class="empty-state">
         <span>01</span>
@@ -59,11 +67,13 @@
           </span>
           <span v-else-if="message.status === 'error'">响应中断</span>
         </div>
+        <!-- 助手：Markdown + KaTeX；内容已在 renderMarkdown 内消毒 -->
         <div
           v-if="message.content && message.role === 'assistant'"
           class="message-body markdown-body"
           v-html="renderMarkdown(message.content)"
         />
+        <!-- 用户：纯文本插值，避免把用户输入当 HTML 执行 -->
         <p v-else-if="message.content" class="message-body">
           {{ message.content }}
         </p>
@@ -76,6 +86,7 @@
         {{ errorMessage }}
       </p>
 
+      <!-- Enter 提交；Shift+Enter 由 textarea 默认行为换行（未 .prevent） -->
       <form @submit.prevent="submit">
         <label class="visually-hidden" for="message-input">
           输入消息
@@ -95,6 +106,7 @@
         </button>
       </form>
 
+      <!-- 默认开启：携带完整已完成历史；关闭后仅发本次用户输入 -->
       <label class="history-setting">
         <input
           v-model="includeHistory"
@@ -113,28 +125,56 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * `/openai` 流式聊天页。
+ *
+ * 布局：顶部配置（Base URL / API Key）→ 中部消息列表 → 底部输入与历史开关。
+ *
+ * 关键约束：
+ * - Base URL、API Key、消息列表只存在组件内存中；离开路由后不落盘。
+ * - API Key 会由浏览器直连第三方接口；页面需提示 CORS / 密钥暴露风险。
+ * - 助手消息走 Markdown + KaTeX 渲染；用户消息保持纯文本，避免把用户输入当 HTML。
+ * - 请求进行中禁止重复提交；卸载时 abort 进行中的请求并清空 apiKey。
+ */
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 import {
   streamChat,
   type ChatRequestMessage
 } from '@/services/openai'
 import { renderMarkdown } from '@/utils/renderMarkdown'
+/** KaTeX 公式排版样式；必须与 renderMarkdown 中的 KaTeX HTML 配套引入。 */
+import 'katex/dist/katex.min.css'
 
+/**
+ * 页面消息模型。
+ * - `id`：稳定列表 key
+ * - `status`：仅 UI 使用，发往接口时会被剥掉，只保留 role/content
+ */
 interface ViewMessage extends ChatRequestMessage {
   id: string
   status?: 'streaming' | 'complete' | 'error'
 }
 
+/** 用户填写的 OpenAI 兼容服务根地址。 */
 const baseUrl = ref('')
+/** 用户填写的 API Key；组件卸载时主动清空。 */
 const apiKey = ref('')
+/** 输入框草稿。 */
 const input = ref('')
+/** 是否携带历史消息；默认开启以支持多轮对话。 */
 const includeHistory = ref(true)
+/** 当前会话内的全部可见消息（含流式中的助手占位消息）。 */
 const messages = ref<ViewMessage[]>([])
+/** 是否有进行中的流式请求。 */
 const isLoading = ref(false)
+/** 页面级错误文案（校验失败 / 网络失败 / 流解析失败等）。 */
 const errorMessage = ref('')
+/** 消息列表滚动容器，用于自动滚到底部。 */
 const messageList = ref<HTMLElement>()
+/** 当前请求的 AbortController；卸载或替换请求时使用。 */
 let activeController: AbortController | undefined
 
+/** 创建一条带本地唯一 id 的消息对象。 */
 function createMessage(
   role: ViewMessage['role'],
   content: string,
@@ -148,6 +188,7 @@ function createMessage(
   }
 }
 
+/** 等 DOM 更新后把消息列表滚到最底部，保证流式输出可见。 */
 async function scrollToBottom() {
   await nextTick()
   messageList.value?.scrollTo?.({
@@ -156,6 +197,10 @@ async function scrollToBottom() {
   })
 }
 
+/**
+ * 提交前校验。
+ * @returns 空字符串表示通过；非空为应展示的错误文案。
+ */
 function validate(content: string): string {
   if (!baseUrl.value.trim()) {
     return '请输入 Base URL'
@@ -172,6 +217,13 @@ function validate(content: string): string {
   return ''
 }
 
+/**
+ * 构造“可发送的历史上下文”。
+ * 规则：
+ * - 用户消息一律纳入（它们没有 status，或视为已确认输入）
+ * - 助手消息仅纳入 `status === 'complete'` 的完整回复
+ * - 排除当前仍在 streaming / error 的占位助手消息，避免把空串或半截错误状态发给模型
+ */
 function completedHistory(): ChatRequestMessage[] {
   return messages.value
     .filter(
@@ -181,11 +233,16 @@ function completedHistory(): ChatRequestMessage[] {
     .map(({ role, content }) => ({ role, content }))
 }
 
+/**
+ * 将未知异常转为面向用户的中文提示。
+ * 注意：不得在文案中拼入 apiKey。
+ */
 function readableError(error: unknown): string {
   if (error instanceof Error && error.name === 'AbortError') {
     return '请求已结束'
   }
 
+  // 浏览器在 CORS / 网络失败时常抛 TypeError: Failed to fetch。
   if (error instanceof TypeError) {
     return '网络请求失败，请检查 Base URL、目标服务跨域配置和网络连接'
   }
@@ -197,8 +254,17 @@ function readableError(error: unknown): string {
   return '请求失败，请检查地址、跨域配置和网络连接'
 }
 
+/**
+ * 提交一轮对话：
+ * 1. 校验并清空上一次页面错误
+ * 2. 立即插入用户消息 + 空的 streaming 助手消息（乐观 UI）
+ * 3. 按历史开关组装请求 messages
+ * 4. 流式追加助手内容；成功标 complete，失败保留已输出并标 error
+ */
 async function submit() {
+  // 请求中直接忽略二次提交（按钮也会 disabled，这里是双保险）。
   if (isLoading.value) {
+    console.log('[openai][page] submit ignored: already loading')
     return
   }
 
@@ -206,18 +272,27 @@ async function submit() {
   const validationError = validate(content)
 
   if (validationError) {
+    console.warn('[openai][page] validation failed', validationError)
     errorMessage.value = validationError
     return
   }
 
   errorMessage.value = ''
+  // 注意：历史上下文在 push 占位助手消息之前就算好，避免把空助手消息带进请求。
   const requestMessages = includeHistory.value
     ? [...completedHistory(), { role: 'user' as const, content }]
     : [{ role: 'user' as const, content }]
   const userMessage = createMessage('user', content)
   const assistantMessage = createMessage('assistant', '', 'streaming')
 
+  console.log('[openai][page] submit', {
+    includeHistory: includeHistory.value,
+    requestMessageCount: requestMessages.length,
+    contentLength: content.length
+  })
+
   messages.value.push(userMessage, assistantMessage)
+  // 必须取数组里的响应式对象引用，后续 onDelta 才能触发视图更新。
   const reactiveAssistantMessage =
     messages.value[messages.value.length - 1]
   input.value = ''
@@ -233,14 +308,21 @@ async function submit() {
       messages: requestMessages,
       signal: controller.signal,
       onDelta(delta) {
+        console.log('delta::', delta);
+        console.log('[openai][page] onDelta', delta)
         reactiveAssistantMessage.content += delta
         void scrollToBottom()
       }
     })
     reactiveAssistantMessage.status = 'complete'
+    console.log('[openai][page] assistant complete', {
+      contentLength: reactiveAssistantMessage.content.length
+    })
   } catch (error) {
+    // 保留已接收的部分文本，仅改状态并展示错误，便于用户看到中断前的内容。
     reactiveAssistantMessage.status = 'error'
     errorMessage.value = readableError(error)
+    console.error('[openai][page] assistant error', error)
   } finally {
     isLoading.value = false
     activeController = undefined
@@ -248,6 +330,10 @@ async function submit() {
 }
 
 onBeforeUnmount(() => {
+  // 离开页面时中止进行中的请求，并主动丢弃内存中的密钥。
+  console.log('[openai][page] unmount', {
+    hasActiveRequest: Boolean(activeController)
+  })
   activeController?.abort()
   apiKey.value = ''
 })
@@ -515,6 +601,16 @@ onBeforeUnmount(() => {
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.markdown-body :deep(.katex-display) {
+  margin: 0.9em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.markdown-body :deep(.katex) {
+  font-size: 1.05em;
 }
 
 .streaming-dot::before {

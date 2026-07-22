@@ -150,4 +150,18 @@ describe('OpenAIView', () => {
     expect(assistant.find('table').exists()).toBe(true)
     expect(assistant.text()).not.toContain('### 住宿建议')
   })
+
+  it('renders assistant math formulas with KaTeX', async () => {
+    streamChatMock.mockImplementation(async ({ onDelta }) => {
+      onDelta('公式 $E=mc^2$')
+    })
+    const wrapper = mount(OpenAIView)
+    await fillConfig(wrapper)
+
+    await submitMessage(wrapper, '能量公式')
+
+    const assistant = wrapper.get('[data-role="assistant"]')
+    expect(assistant.find('.katex').exists()).toBe(true)
+    expect(assistant.text()).not.toContain('$E=mc^2$')
+  })
 })
