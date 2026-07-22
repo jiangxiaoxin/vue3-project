@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  FORMULA_SYSTEM_PROMPT,
   OpenAIRequestError,
   buildChatCompletionsUrl,
   streamChat
@@ -56,7 +57,10 @@ describe('streamChat', () => {
     expect(JSON.parse(request.body)).toEqual({
       model: 'gpt-5.5',
       stream: true,
-      messages
+      messages: [
+        { role: 'system', content: FORMULA_SYSTEM_PROMPT },
+        ...messages
+      ]
     })
     expect(onDelta).toHaveBeenCalledWith('answer')
   })
@@ -98,5 +102,33 @@ describe('streamChat', () => {
         fetchImpl: fetchImpl as typeof fetch
       })
     ).rejects.toBeInstanceOf(OpenAIRequestError)
+  })
+
+  it('logs the full SSE text after the stream finishes', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const fetchImpl = vi.fn().mockResolvedValue(
+      createStreamResponse(
+        'data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n' +
+          'data: {"choices":[{"delta":{"content":" world"}}]}\n\n' +
+          'data: [DONE]\n\n'
+      )
+    )
+
+    try {
+      await streamChat({
+        baseUrl: 'https://example.com/v1',
+        apiKey: 'secret-key',
+        messages: [{ role: 'user', content: 'question' }],
+        onDelta: vi.fn(),
+        fetchImpl: fetchImpl as typeof fetch
+      })
+
+      expect(logSpy).toHaveBeenCalledWith(
+        '[openai][request] full stream content',
+        'Hello world'
+      )
+    } finally {
+      logSpy.mockRestore()
+    }
   })
 })

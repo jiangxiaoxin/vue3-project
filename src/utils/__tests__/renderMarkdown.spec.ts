@@ -47,4 +47,32 @@ describe('renderMarkdown', () => {
     expect(html).toMatch(/H/)
     expect(html).toMatch(/O/)
   })
+
+  it('normalizes bare bracket math blocks used by some models', () => {
+    const html = renderMarkdown(
+      '2. 库仑定律\n\n[\nF = k\\frac{|q_1q_2|}{r^2}\n]\n\n其中\n\n[\nk \\approx 9.0\\times10^9\n]'
+    )
+
+    expect(html).toContain('katex')
+    expect(html).toContain('frac')
+    expect(html).not.toContain('\\frac{|q_1q_2|}{r^2}')
+  })
+
+  it('normalizes LaTeX \\[ \\] and \\( \\) delimiters', () => {
+    const html = renderMarkdown(
+      '电荷：\\(\\sum q\\)\n\n\\[\nF = ma\n\\]'
+    )
+
+    expect(html).toContain('katex')
+    expect(html).not.toContain('\\sum q')
+    expect(html).not.toContain('\\[\nF = ma\n\\]')
+  })
+
+  it('does not treat markdown links as math brackets', () => {
+    const html = renderMarkdown('查看 [文档](https://example.com) 了解更多')
+
+    expect(html).toContain('<a href="https://example.com"')
+    expect(html).toContain('文档')
+    expect(html).not.toContain('katex')
+  })
 })

@@ -2,10 +2,11 @@
  * Markdown + 公式渲染工具。
  *
  * 管线：
- * 1. `marked` 解析 GFM Markdown（标题、表格、列表等）
- * 2. `marked-katex-extension` 将 `$...$` / `$$...$$` 转为 KaTeX HTML
- * 3. 通过 `katex/contrib/mhchem` 支持化学式（如 `\ce{H2O}`）
- * 4. `DOMPurify` 消毒后再交给 `v-html`，降低 XSS 风险
+ * 1. `normalizeMathDelimiters` 兼容模型常见的非标准公式分隔符
+ * 2. `marked` 解析 GFM Markdown（标题、表格、列表等）
+ * 3. `marked-katex-extension` 将 `$...$` / `$$...$$` 转为 KaTeX HTML
+ * 4. 通过 `katex/contrib/mhchem` 支持化学式（如 `\ce{H2O}`）
+ * 5. `DOMPurify` 消毒后再交给 `v-html`，降低 XSS 风险
  *
  * 约束：
  * - `throwOnError: false`：流式过程中公式可能暂时不完整，不因单次解析失败中断整段渲染。
@@ -102,6 +103,48 @@ const PURIFY_OPTIONS: DOMPurify.Config = {
   ]
 }
 
+/** 粗略判断一段文本是否像数学公式，避免把普通方括号块误当成公式。 */
+function looksLikeMath(body: string): boolean {
+  return /\\[a-zA-Z]+/.test(body) || /[≠≈≤≥±∞∑∫√]/.test(body)
+}
+
+/**
+ * 将模型常见的非标准公式分隔符规范为 `$` / `$$`。
+ *
+ * 兼容：
+ * - `\[...\]` / `\(...\)`：标准 LaTeX 分隔符（marked 可能会吃掉反斜杠，故需前置转换）
+ * - 独立成行的裸 `[` `]` 包裹且正文含 LaTeX 命令：部分模型会这样输出块级公式
+ *
+ * 不处理 Markdown 链接 `[text](url)`，因其不是“方括号独占一行”的结构。
+ */
+export function normalizeMathDelimiters(markdown: string): string {
+  let text = markdown
+
+  // \[ ... \] → $$ ... $$
+  text = text.replace(/\\\[([\s\S]*?)\\\]/g, (_match, body: string) => {
+    return `$$${body}$$`
+  })
+
+  // \( ... \) → $ ... $
+  text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_match, body: string) => {
+    return `$${body}$`
+  })
+
+  // 裸多行方括号块：仅当内容像公式时才转换
+  text = text.replace(
+    /(^|\n)\[\s*\n([\s\S]*?)\n\s*\](?=\n|$)/g,
+    (match, prefix: string, body: string) => {
+      if (!looksLikeMath(body)) {
+        return match
+      }
+
+      return `${prefix}$$\n${body.trim()}\n$$`
+    }
+  )
+
+  return text
+}
+
 /**
  * 将 Markdown（可含 LaTeX / mhchem）渲染为可安全注入 DOM 的 HTML 字符串。
  *
@@ -109,7 +152,13 @@ const PURIFY_OPTIONS: DOMPurify.Config = {
  * @returns 已消毒的 HTML；调用方通常用于助手消息的 `v-html`
  */
 export function renderMarkdown(markdown: string): string {
+  const normalized = normalizeMathDelimiters(markdown)
+
+  if (normalized !== markdown) {
+    console.log('[openai][markdown] normalized math delimiters')
+  }
+
   // marked.parse 在 async:false 时同步返回 string；显式断言避免 Promise 联合类型干扰调用方。
-  const html = marked.parse(markdown, { async: false }) as string
+  const html = marked.parse(normalized, { async: false }) as string
   return DOMPurify.sanitize(html, PURIFY_OPTIONS)
 }

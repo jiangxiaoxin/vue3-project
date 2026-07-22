@@ -12,6 +12,14 @@
 
 import { parseOpenAIStream } from '@/utils/parseOpenAIStream'
 
+/**
+ * 固定系统提示词：要求科学公式按严格 LaTeX 科学论文格式返回，
+ * 便于前端 KaTeX（`$` / `$$` / `\[ \]` 等）正确渲染。
+ * 由 `streamChat` 在每次请求时自动前置，不进入页面消息列表。
+ */
+export const FORMULA_SYSTEM_PROMPT =
+  '如果内容涉及到数学公式，化学公式，物理公式等科学公式类内容，请对相关内容按照严格的 latex 科学论文编写所要求的公式格式返回内容'
+
 /** 发往 chat.completions 的消息结构（不含页面 UI 专用字段）。 */
 export interface ChatRequestMessage {
   role: 'user' | 'assistant'
@@ -85,6 +93,7 @@ async function getResponseError(response: Response): Promise<string> {
  * 固定约定（当前产品需求）：
  * - model: `gpt-5.5`
  * - stream: `true`
+ * - 每次请求自动前置 `FORMULA_SYSTEM_PROMPT` 系统消息（不依赖页面历史）
  *
  * @throws {OpenAIRequestError} HTTP 失败或响应无 body
  * @throws {OpenAIStreamParseError} SSE 数据非法（由解析器抛出）
@@ -99,12 +108,18 @@ export async function streamChat({
   fetchImpl = fetch
 }: StreamChatOptions): Promise<void> {
   const url = buildChatCompletionsUrl(baseUrl)
+  const requestMessages = [
+    { role: 'system' as const, content: FORMULA_SYSTEM_PROMPT },
+    ...messages
+  ]
+
   // 调试日志不得打印 apiKey。
   console.log('[openai][request] start', {
     url,
-    messageCount: messages.length,
+    messageCount: requestMessages.length,
     model: 'gpt-5.5',
-    stream: true
+    stream: true,
+    hasSystemPrompt: true
   })
 
   const response = await fetchImpl(url, {
@@ -116,7 +131,7 @@ export async function streamChat({
     body: JSON.stringify({
       model: 'gpt-5.5',
       stream: true,
-      messages
+      messages: requestMessages
     }),
     signal
   })
@@ -137,6 +152,18 @@ export async function streamChat({
     throw new OpenAIRequestError('响应中没有可读取的数据流', response.status)
   }
 
-  await parseOpenAIStream(response.body, onDelta)
+  /** 累计本次 SSE 全部文本增量，请求彻底结束后作为测试日志输出。 */
+  let fullStreamContent = ''
+
+  try {
+    await parseOpenAIStream(response.body, (delta) => {
+      fullStreamContent += delta
+      onDelta(delta)
+    })
+  } finally {
+    // 无论正常 [DONE]、读完流，还是中途 abort/解析失败，都打印已收到的完整拼接内容。
+    console.log('[openai][request] full stream content', fullStreamContent)
+  }
+
   console.log('[openai][request] stream finished')
 }
