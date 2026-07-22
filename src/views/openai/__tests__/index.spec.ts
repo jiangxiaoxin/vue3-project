@@ -164,4 +164,38 @@ describe('OpenAIView', () => {
     expect(assistant.find('.katex').exists()).toBe(true)
     expect(assistant.text()).not.toContain('$E=mc^2$')
   })
+
+  it('aborts the active SSE request when stop is clicked', async () => {
+    let abortSignal: AbortSignal | undefined
+    streamChatMock.mockImplementation(({ onDelta, signal }) => {
+      abortSignal = signal
+      onDelta('Partial')
+      return new Promise<void>((_resolve, reject) => {
+        signal?.addEventListener('abort', () => {
+          const error = new Error('Aborted')
+          error.name = 'AbortError'
+          reject(error)
+        })
+      })
+    })
+    const wrapper = mount(OpenAIView)
+    await fillConfig(wrapper)
+
+    await wrapper.get('[data-testid="message-input"]').setValue('开始生成')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="stop-stream"]').exists()).toBe(true)
+
+    await wrapper.get('[data-testid="stop-stream"]').trigger('click')
+    await flushPromises()
+
+    expect(abortSignal?.aborted).toBe(true)
+    expect(wrapper.find('[data-testid="stop-stream"]').exists()).toBe(false)
+    expect(wrapper.get('[data-role="assistant"]').text()).toContain('Partial')
+    expect(wrapper.get('[data-role="assistant"]').classes()).toContain(
+      'message--error'
+    )
+    expect(wrapper.get('[role="alert"]').text()).toContain('已停止生成')
+  })
 })

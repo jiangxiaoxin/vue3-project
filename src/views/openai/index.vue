@@ -100,8 +100,19 @@
           :disabled="isLoading"
           @keydown.enter.exact.prevent="submit"
         />
-        <button type="submit" :disabled="isLoading">
-          <span>{{ isLoading ? '接收中' : '发送消息' }}</span>
+        <!-- 流式进行中：显示停止按钮，主动 abort 当前 SSE -->
+        <button
+          v-if="isLoading"
+          type="button"
+          class="stop-button"
+          data-testid="stop-stream"
+          @click="stopStream"
+        >
+          <span>停止生成</span>
+          <span aria-hidden="true">■</span>
+        </button>
+        <button v-else type="submit">
+          <span>发送消息</span>
           <span aria-hidden="true">↗</span>
         </button>
       </form>
@@ -134,7 +145,8 @@
  * - Base URL、API Key、消息列表只存在组件内存中；离开路由后不落盘。
  * - API Key 会由浏览器直连第三方接口；页面需提示 CORS / 密钥暴露风险。
  * - 助手消息走 Markdown + KaTeX 渲染；用户消息保持纯文本，避免把用户输入当 HTML。
- * - 请求进行中禁止重复提交；卸载时 abort 进行中的请求并清空 apiKey。
+ * - 请求进行中禁止重复提交；可通过“停止生成”主动 abort 当前 SSE。
+ * - 卸载时 abort 进行中的请求并清空 apiKey。
  */
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 import {
@@ -239,7 +251,7 @@ function completedHistory(): ChatRequestMessage[] {
  */
 function readableError(error: unknown): string {
   if (error instanceof Error && error.name === 'AbortError') {
-    return '请求已结束'
+    return '已停止生成'
   }
 
   // 浏览器在 CORS / 网络失败时常抛 TypeError: Failed to fetch。
@@ -252,6 +264,20 @@ function readableError(error: unknown): string {
   }
 
   return '请求失败，请检查地址、跨域配置和网络连接'
+}
+
+/**
+ * 主动断开当前 SSE：abort AbortController。
+ * fetch / 流读取会以 AbortError 结束，由 submit 的 catch 收敛 UI 状态。
+ */
+function stopStream() {
+  if (!activeController) {
+    console.log('[openai][page] stop ignored: no active request')
+    return
+  }
+
+  console.log('[openai][page] stop stream requested')
+  activeController.abort()
 }
 
 /**
@@ -679,6 +705,16 @@ onBeforeUnmount(() => {
 .composer-panel button:hover:not(:disabled) {
   color: var(--ink);
   background: var(--acid);
+}
+
+.composer-panel .stop-button {
+  color: var(--paper);
+  background: #9f2f20;
+}
+
+.composer-panel .stop-button:hover:not(:disabled) {
+  color: var(--paper);
+  background: #b4422d;
 }
 
 .composer-panel button:disabled,
