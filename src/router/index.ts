@@ -343,6 +343,24 @@ export const config = [
     path: '/dyna',
     name: 'dyna',
     component: () => import("@/views/DynamicRendererDemo.vue")
+  },
+  {
+    path: '/a',
+    name: 'page-a',
+    component: () => import('@/views/routeAB/A.vue'),
+    meta: {
+      keepAlive: true
+    }
+  },
+  {
+    path: '/b',
+    name: 'page-b',
+    component: () => import('@/views/routeAB/B.vue')
+  },
+  {
+    path: '/openai',
+    name: 'openai',
+    component: () => import('@/views/openai/index.vue')
   }
   // {
   //   path: '/leetcode',

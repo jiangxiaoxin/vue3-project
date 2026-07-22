@@ -1,0 +1,32 @@
+import { describe, expect, it } from 'vitest'
+import { renderMarkdown } from '../renderMarkdown'
+
+describe('renderMarkdown', () => {
+  it('renders headings and tables as HTML elements', () => {
+    const html = renderMarkdown(
+      '### 住宿建议\n\n| 区域 | 优点 |\n| --- | --- |\n| 老城区 | 方便 |'
+    )
+
+    expect(html).toContain('<h3>')
+    expect(html).toContain('住宿建议')
+    expect(html).toContain('<table>')
+    expect(html).toContain('<th>')
+    expect(html).toContain('老城区')
+    expect(html).not.toContain('### 住宿建议')
+  })
+
+  it('keeps bold and list markup', () => {
+    const html = renderMarkdown('- **重点**事项')
+
+    expect(html).toContain('<ul>')
+    expect(html).toContain('<strong>')
+    expect(html).toContain('重点')
+  })
+
+  it('strips script tags from markdown HTML', () => {
+    const html = renderMarkdown('<script>alert(1)</script>安全文本')
+
+    expect(html).not.toContain('<script>')
+    expect(html).toContain('安全文本')
+  })
+})

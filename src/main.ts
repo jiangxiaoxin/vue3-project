@@ -26,6 +26,7 @@ import 'vxe-table/lib/style.css'
 import ExcelJS from 'exceljs'
 import VXETablePluginExportXLSX from 'vxe-table-plugin-export-xlsx'
 import "/public/tt.js"
+import AppEmpty from './AppEmpty.vue'
 
 const zindex = useZIndex()
 // console.log(
@@ -35,7 +36,7 @@ const zindex = useZIndex()
 //   zindex.currentZIndex.value
 // )
 
-const app = createApp(App)
+const app = createApp(AppEmpty)
 // const app = createApp(App1111)
 // const app = createApp(UseTemplate)
 
