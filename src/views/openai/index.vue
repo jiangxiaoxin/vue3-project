@@ -11,7 +11,7 @@
       <div class="brand-block">
         <span class="eyebrow">STREAM CONSOLE</span>
         <h1>OpenAI 对话实验室</h1>
-        <p>配置仅保留在当前页面内存中，关闭页面后自动清除。</p>
+        <p>API Key 仅保留在当前页面内存；对话历史保存在本地 IndexedDB，刷新后自动恢复最近 10 轮。</p>
       </div>
 
       <div class="config-fields">
@@ -118,19 +118,31 @@
       </form>
 
       <!-- 默认开启：携带完整已完成历史；关闭后仅发本次用户输入 -->
-      <label class="history-setting">
-        <input
-          v-model="includeHistory"
-          data-testid="include-history"
-          type="checkbox"
+      <div class="history-toolbar">
+        <label class="history-setting">
+          <input
+            v-model="includeHistory"
+            data-testid="include-history"
+            type="checkbox"
+            :disabled="isLoading"
+          />
+          <span class="switch" aria-hidden="true"></span>
+          <span>
+            <strong>携带历史消息</strong>
+            <small>关闭后仅发送本次输入</small>
+          </span>
+        </label>
+
+        <button
+          type="button"
+          class="clear-history-button"
+          data-testid="clear-history"
           :disabled="isLoading"
-        />
-        <span class="switch" aria-hidden="true"></span>
-        <span>
-          <strong>携带历史消息</strong>
-          <small>关闭后仅发送本次输入</small>
-        </span>
-      </label>
+          @click="clearLocalHistory"
+        >
+          清理历史会话
+        </button>
+      </div>
     </footer>
   </main>
 </template>
@@ -145,14 +157,21 @@
  * - Base URL、API Key、消息列表只存在组件内存中；离开路由后不落盘。
  * - API Key 会由浏览器直连第三方接口；页面需提示 CORS / 密钥暴露风险。
  * - 助手消息走 Markdown + KaTeX 渲染；用户消息保持纯文本，避免把用户输入当 HTML。
+ * - 对话消息在每轮结束后写入 IndexedDB；刷新后自动载入最近 10 轮。
  * - 请求进行中禁止重复提交；可通过“停止生成”主动 abort 当前 SSE。
- * - 卸载时 abort 进行中的请求并清空 apiKey。
+ * - 卸载时 abort 进行中的请求并清空 apiKey（不清理 IndexedDB 历史）。
  */
-import { nextTick, onBeforeUnmount, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   streamChat,
   type ChatRequestMessage
 } from '@/services/openai'
+import {
+  clearChatHistory,
+  loadRecentChatRounds,
+  saveChatMessages,
+  type StoredChatMessage
+} from '@/services/chatHistoryDb'
 import { renderMarkdown } from '@/utils/renderMarkdown'
 /** KaTeX 公式排版样式；必须与 renderMarkdown 中的 KaTeX HTML 配套引入。 */
 import 'katex/dist/katex.min.css'
@@ -161,10 +180,12 @@ import 'katex/dist/katex.min.css'
  * 页面消息模型。
  * - `id`：稳定列表 key
  * - `status`：仅 UI 使用，发往接口时会被剥掉，只保留 role/content
+ * - `createdAt`：本地排序与 IndexedDB 持久化时间戳
  */
 interface ViewMessage extends ChatRequestMessage {
   id: string
   status?: 'streaming' | 'complete' | 'error'
+  createdAt: number
 }
 
 /** 用户填写的 OpenAI 兼容服务根地址。 */
@@ -185,6 +206,8 @@ const errorMessage = ref('')
 const messageList = ref<HTMLElement>()
 /** 当前请求的 AbortController；卸载或替换请求时使用。 */
 let activeController: AbortController | undefined
+/** 递增以作废进行中的历史恢复，避免卸载后的异步结果回写消息列表。 */
+let historyLoadToken = 0
 
 /** 创建一条带本地唯一 id 的消息对象。 */
 function createMessage(
@@ -196,7 +219,109 @@ function createMessage(
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     role,
     content,
-    status
+    status,
+    createdAt: Date.now()
+  }
+}
+
+function toStoredMessage(message: ViewMessage): StoredChatMessage | null {
+  if (message.status === 'streaming') {
+    return null
+  }
+
+  if (message.role === 'assistant' && !message.content) {
+    return null
+  }
+
+  return {
+    id: message.id,
+    role: message.role,
+    content: message.content,
+    status:
+      message.status === 'complete' || message.status === 'error'
+        ? message.status
+        : message.role === 'assistant'
+          ? 'complete'
+          : undefined,
+    createdAt: message.createdAt
+  }
+}
+
+/** 将本轮已稳定的用户/助手消息写入 IndexedDB。 */
+async function persistTurn(messagesToSave: ViewMessage[]) {
+  const payload = messagesToSave
+    .map(toStoredMessage)
+    .filter((item): item is StoredChatMessage => item !== null)
+
+  if (payload.length === 0) {
+    return
+  }
+
+  try {
+    await saveChatMessages(payload)
+  } catch (error) {
+    console.error('[openai][page] persist history failed', error)
+  }
+}
+
+/** 刷新后从 IndexedDB 恢复最近对话轮次。 */
+async function restoreLocalHistory() {
+  const loadToken = ++historyLoadToken
+
+  try {
+    const stored = await loadRecentChatRounds()
+    if (loadToken !== historyLoadToken) {
+      console.log('[openai][page] skip stale history restore', { loadToken })
+      return
+    }
+
+    // IndexedDB 完成可能晚于用户已开始输入/发送；勿覆盖进行中的会话。
+    if (messages.value.length > 0 || isLoading.value) {
+      console.log('[openai][page] skip history restore; session already active', {
+        messageCount: messages.value.length,
+        isLoading: isLoading.value
+      })
+      return
+    }
+
+    messages.value = stored.map((item) => ({
+      id: item.id,
+      role: item.role,
+      content: item.content,
+      status: item.status,
+      createdAt: item.createdAt
+    }))
+    console.log('[openai][page] restored local history', {
+      count: messages.value.length
+    })
+    if (messages.value.length > 0) {
+      await scrollToBottom()
+    }
+  } catch (error) {
+    if (loadToken !== historyLoadToken) {
+      return
+    }
+    console.error('[openai][page] restore history failed', error)
+  }
+}
+
+/** 清理本地全部历史，并清空当前页面消息列表。 */
+async function clearLocalHistory() {
+  if (isLoading.value) {
+    return
+  }
+
+  // 作废进行中的恢复，避免 clear 后异步 restore 把旧数据写回。
+  historyLoadToken += 1
+
+  try {
+    await clearChatHistory()
+    messages.value = []
+    errorMessage.value = ''
+    console.log('[openai][page] local history cleared')
+  } catch (error) {
+    errorMessage.value = '清理本地历史失败，请重试'
+    console.error('[openai][page] clear history failed', error)
   }
 }
 
@@ -321,6 +446,8 @@ async function submit() {
   // 必须取数组里的响应式对象引用，后续 onDelta 才能触发视图更新。
   const reactiveAssistantMessage =
     messages.value[messages.value.length - 1]
+  // 用户消息先落库；助手在本轮结束后再更新（同 id put）。
+  void persistTurn([userMessage])
   input.value = ''
   isLoading.value = true
   const controller = new AbortController()
@@ -352,11 +479,17 @@ async function submit() {
   } finally {
     isLoading.value = false
     activeController = undefined
+    void persistTurn([userMessage, reactiveAssistantMessage])
   }
 }
 
+onMounted(() => {
+  void restoreLocalHistory()
+})
+
 onBeforeUnmount(() => {
   // 离开页面时中止进行中的请求，并主动丢弃内存中的密钥。
+  historyLoadToken += 1
   console.log('[openai][page] unmount', {
     hasActiveRequest: Boolean(activeController)
   })
@@ -723,12 +856,40 @@ onBeforeUnmount(() => {
   opacity: 0.58;
 }
 
+.history-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .history-setting {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
+  margin-top: 0;
   cursor: pointer;
+}
+
+.clear-history-button {
+  border: 1px solid var(--ink);
+  padding: 8px 12px;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clear-history-button:hover:not(:disabled) {
+  background: var(--acid);
+}
+
+.clear-history-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .history-setting input {

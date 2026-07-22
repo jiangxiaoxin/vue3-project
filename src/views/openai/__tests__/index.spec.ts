@@ -1,6 +1,12 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+﻿import 'fake-indexeddb/auto'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { streamChat } from '@/services/openai'
+import {
+  clearChatHistory,
+  loadRecentChatRounds,
+  saveChatMessages
+} from '@/services/chatHistoryDb'
 import OpenAIView from '../index.vue'
 
 vi.mock('@/services/openai', () => ({
@@ -8,6 +14,20 @@ vi.mock('@/services/openai', () => ({
 }))
 
 const streamChatMock = vi.mocked(streamChat)
+const wrappers: VueWrapper[] = []
+
+function mountView() {
+  const wrapper = mount(OpenAIView)
+  wrappers.push(wrapper)
+  return wrapper
+}
+
+/** IndexedDB 回调不在 Vue 微任务队列内，需额外等待。 */
+async function settleIndexedDb() {
+  await flushPromises()
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  await flushPromises()
+}
 
 async function fillConfig(wrapper: ReturnType<typeof mount>) {
   await wrapper
@@ -23,15 +43,27 @@ async function submitMessage(
   await wrapper.get('[data-testid="message-input"]').setValue(content)
   await wrapper.get('form').trigger('submit')
   await flushPromises()
+  await settleIndexedDb()
 }
 
 describe('OpenAIView', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     streamChatMock.mockReset()
+    await clearChatHistory()
+    await settleIndexedDb()
   })
 
-  it('provides an associated label for the message composer', () => {
-    const wrapper = mount(OpenAIView)
+  afterEach(async () => {
+    while (wrappers.length > 0) {
+      wrappers.pop()?.unmount()
+    }
+    await settleIndexedDb()
+    await clearChatHistory()
+  })
+
+  it('provides an associated label for the message composer', async () => {
+    const wrapper = mountView()
+    await settleIndexedDb()
     const textarea = wrapper.get('[data-testid="message-input"]')
     const label = wrapper.get('label[for="message-input"]')
 
@@ -40,7 +72,8 @@ describe('OpenAIView', () => {
   })
 
   it('validates config and message before sending', async () => {
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
 
     await wrapper.get('form').trigger('submit')
 
@@ -48,6 +81,79 @@ describe('OpenAIView', () => {
     expect(wrapper.get('[role="alert"]').text()).toContain(
       '请输入 Base URL'
     )
+  })
+
+  it('restores recent local history on mount', async () => {
+    await saveChatMessages([
+      {
+        id: 'u1',
+        role: 'user',
+        content: '历史问题',
+        createdAt: 1
+      },
+      {
+        id: 'a1',
+        role: 'assistant',
+        content: '历史回答',
+        status: 'complete',
+        createdAt: 2
+      }
+    ])
+    await settleIndexedDb()
+
+    const wrapper = mountView()
+    await vi.waitFor(() => {
+      expect(wrapper.get('[data-role="user"]').text()).toContain('历史问题')
+    })
+    expect(wrapper.get('[data-role="assistant"]').text()).toContain(
+      '历史回答'
+    )
+  })
+
+  it('persists the finished turn into IndexedDB', async () => {
+    streamChatMock.mockImplementation(async ({ onDelta }) => {
+      onDelta('本地回答')
+    })
+    const wrapper = mountView()
+    await settleIndexedDb()
+    await fillConfig(wrapper)
+
+    await submitMessage(wrapper, '本地问题')
+
+    const stored = await loadRecentChatRounds()
+    expect(stored.some((item) => item.content === '本地问题')).toBe(true)
+    expect(stored.some((item) => item.content === '本地回答')).toBe(true)
+  })
+
+  it('clears local history and the message list', async () => {
+    await saveChatMessages([
+      {
+        id: 'u1',
+        role: 'user',
+        content: '旧问题',
+        createdAt: 1
+      },
+      {
+        id: 'a1',
+        role: 'assistant',
+        content: '旧回答',
+        status: 'complete',
+        createdAt: 2
+      }
+    ])
+    await settleIndexedDb()
+
+    const wrapper = mountView()
+    await vi.waitFor(() => {
+      expect(wrapper.findAll('[data-role="user"]')).toHaveLength(1)
+    })
+
+    await wrapper.get('[data-testid="clear-history"]').trigger('click')
+    await settleIndexedDb()
+
+    expect(wrapper.findAll('[data-role="user"]')).toHaveLength(0)
+    expect(wrapper.findAll('[data-role="assistant"]')).toHaveLength(0)
+    await expect(loadRecentChatRounds()).resolves.toEqual([])
   })
 
   it('renders streaming deltas before the request completes', async () => {
@@ -59,7 +165,8 @@ describe('OpenAIView', () => {
         resolveStream = resolve
       })
     })
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await wrapper.get('[data-testid="message-input"]').setValue('Hi')
@@ -85,7 +192,8 @@ describe('OpenAIView', () => {
     streamChatMock
       .mockImplementationOnce(async ({ onDelta }) => onDelta('First answer'))
       .mockImplementationOnce(async ({ onDelta }) => onDelta('Second answer'))
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await submitMessage(wrapper, 'First question')
@@ -102,7 +210,8 @@ describe('OpenAIView', () => {
     streamChatMock
       .mockImplementationOnce(async ({ onDelta }) => onDelta('First answer'))
       .mockImplementationOnce(async ({ onDelta }) => onDelta('Second answer'))
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await submitMessage(wrapper, 'First question')
@@ -119,7 +228,8 @@ describe('OpenAIView', () => {
       onDelta('Partial answer')
       throw new Error('stream interrupted')
     })
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await submitMessage(wrapper, 'Question')
@@ -139,7 +249,8 @@ describe('OpenAIView', () => {
     streamChatMock.mockImplementation(async ({ onDelta }) => {
       onDelta('### 住宿建议\n\n| 区域 | 优点 |\n| --- | --- |\n| 老城区 | 方便 |')
     })
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await submitMessage(wrapper, '青岛住宿建议')
@@ -155,7 +266,8 @@ describe('OpenAIView', () => {
     streamChatMock.mockImplementation(async ({ onDelta }) => {
       onDelta('公式 $E=mc^2$')
     })
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await submitMessage(wrapper, '能量公式')
@@ -178,7 +290,8 @@ describe('OpenAIView', () => {
         })
       })
     })
-    const wrapper = mount(OpenAIView)
+    const wrapper = mountView()
+    await settleIndexedDb()
     await fillConfig(wrapper)
 
     await wrapper.get('[data-testid="message-input"]').setValue('开始生成')
