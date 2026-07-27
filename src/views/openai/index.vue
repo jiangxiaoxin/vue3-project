@@ -11,7 +11,7 @@
       <div class="brand-block">
         <span class="eyebrow">STREAM CONSOLE</span>
         <h1>OpenAI 对话实验室</h1>
-        <p>API Key 仅保留在当前页面内存；对话历史保存在本地 IndexedDB，刷新后自动恢复最近 10 轮。</p>
+        <p>API Key 仅保留在当前页面内存；对话历史保存在本地 IndexedDB，刷新后自动恢复最近 10 轮。openai没有公开的思考过程，deepseek有</p>
       </div>
 
       <div class="config-fields">
@@ -167,6 +167,7 @@ import {
   type ChatRequestMessage
 } from '@/services/openai'
 import {
+  allocateSort,
   clearChatHistory,
   loadRecentChatRounds,
   saveChatMessages,
@@ -180,12 +181,14 @@ import 'katex/dist/katex.min.css'
  * 页面消息模型。
  * - `id`：稳定列表 key
  * - `status`：仅 UI 使用，发往接口时会被剥掉，只保留 role/content
- * - `createdAt`：本地排序与 IndexedDB 持久化时间戳
+ * - `createdAt`：墙钟时间（Date.now）
+ * - `sort`：单调递增排序键，恢复历史时严格按此顺序渲染
  */
 interface ViewMessage extends ChatRequestMessage {
   id: string
   status?: 'streaming' | 'complete' | 'error'
   createdAt: number
+  sort: number
 }
 
 /** 用户填写的 OpenAI 兼容服务根地址。 */
@@ -220,7 +223,8 @@ function createMessage(
     role,
     content,
     status,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    sort: allocateSort()
   }
 }
 
@@ -243,7 +247,8 @@ function toStoredMessage(message: ViewMessage): StoredChatMessage | null {
         : message.role === 'assistant'
           ? 'complete'
           : undefined,
-    createdAt: message.createdAt
+    createdAt: message.createdAt,
+    sort: message.sort
   }
 }
 
@@ -289,7 +294,8 @@ async function restoreLocalHistory() {
       role: item.role,
       content: item.content,
       status: item.status,
-      createdAt: item.createdAt
+      createdAt: item.createdAt,
+      sort: item.sort
     }))
     console.log('[openai][page] restored local history', {
       count: messages.value.length

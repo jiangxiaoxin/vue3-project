@@ -89,14 +89,16 @@ describe('OpenAIView', () => {
         id: 'u1',
         role: 'user',
         content: '历史问题',
-        createdAt: 1
+        createdAt: 1,
+        sort: 1
       },
       {
         id: 'a1',
         role: 'assistant',
         content: '历史回答',
         status: 'complete',
-        createdAt: 2
+        createdAt: 2,
+        sort: 2
       }
     ])
     await settleIndexedDb()
@@ -131,14 +133,16 @@ describe('OpenAIView', () => {
         id: 'u1',
         role: 'user',
         content: '旧问题',
-        createdAt: 1
+        createdAt: 1,
+        sort: 1
       },
       {
         id: 'a1',
         role: 'assistant',
         content: '旧回答',
         status: 'complete',
-        createdAt: 2
+        createdAt: 2,
+        sort: 2
       }
     ])
     await settleIndexedDb()
