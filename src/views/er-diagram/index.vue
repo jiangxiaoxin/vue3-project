@@ -22,7 +22,7 @@ const errors = ref<string[]>([])
 const warnings = ref<string[]>([])
 const drawing = ref(false)
 const perfMsg = ref('')
-const showGrid = ref(true)
+const bgMode = ref<'lines' | 'dots' | 'none'>('lines')
 
 const EDGE_BASE_STYLE = { stroke: '#7a8aa6', strokeWidth: 1.5 }
 const EDGE_LINKED_STYLE = { stroke: '#409eff', strokeWidth: 2.5 }
@@ -165,9 +165,18 @@ CREATE TABLE \`order_item\` (
       <button class="btn" @click="loadSchoolSample">学校示例</button>
       <button class="btn" :disabled="drawing" @click="loadPerfSample">性能压测</button>
       <button class="btn" @click="onClear">清空</button>
+      <span class="er-toggle">背景</span>
       <label class="er-toggle">
-        <input v-model="showGrid" type="checkbox" />
-        格子背景
+        <input v-model="bgMode" type="radio" value="lines" />
+        格子
+      </label>
+      <label class="er-toggle">
+        <input v-model="bgMode" type="radio" value="dots" />
+        圆点
+      </label>
+      <label class="er-toggle">
+        <input v-model="bgMode" type="radio" value="none" />
+        无
       </label>
       <span class="er-toolbar__hint">左侧粘贴 MySQL DDL，点击绘制</span>
     </div>
@@ -193,7 +202,7 @@ CREATE TABLE \`order_item\` (
           placeholder="粘贴 MySQL CREATE TABLE 语句…"
         ></textarea>
       </div>
-      <div class="er-right" :class="{ 'grid-on': showGrid }">
+      <div class="er-right" :class="'bg-' + bgMode">
         <VueFlow
           :id="FLOW_ID"
           v-model:nodes="nodes"
@@ -304,11 +313,16 @@ CREATE TABLE \`order_item\` (
   position: relative;
   min-width: 0;
 }
-.er-right.grid-on :deep(.vue-flow) {
+.er-right.bg-lines :deep(.vue-flow) {
   background-image:
     linear-gradient(to right, #eceef2 1px, transparent 1px),
     linear-gradient(to bottom, #eceef2 1px, transparent 1px);
   background-size: 20px 20px;
+}
+.er-right.bg-dots :deep(.vue-flow) {
+  background-image: radial-gradient(circle, #c9cdd6 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
+  background-position: 10px 10px;
 }
 .er-right :deep(.vue-flow__node.node-selected) {
   z-index: 50 !important;
