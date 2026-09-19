@@ -19,6 +19,7 @@ const edges = ref<Edge[]>([])
 const errors = ref<string[]>([])
 const warnings = ref<string[]>([])
 const drawing = ref(false)
+const showGrid = ref(true)
 
 async function onDraw() {
   drawing.value = true
@@ -108,6 +109,10 @@ CREATE TABLE \`order_item\` (
       </button>
       <button class="btn" @click="loadSample">填充示例</button>
       <button class="btn" @click="onClear">清空</button>
+      <label class="er-toggle">
+        <input v-model="showGrid" type="checkbox" />
+        格子背景
+      </label>
       <span class="er-toolbar__hint">左侧粘贴 MySQL DDL，点击绘制</span>
     </div>
 
@@ -129,7 +134,7 @@ CREATE TABLE \`order_item\` (
           placeholder="粘贴 MySQL CREATE TABLE 语句…"
         ></textarea>
       </div>
-      <div class="er-right">
+      <div class="er-right" :class="{ 'grid-on': showGrid }">
         <VueFlow
           :id="FLOW_ID"
           v-model:nodes="nodes"
@@ -236,6 +241,21 @@ CREATE TABLE \`order_item\` (
   flex: 1;
   position: relative;
   min-width: 0;
+}
+.er-right.grid-on :deep(.vue-flow) {
+  background-image:
+    linear-gradient(to right, #eceef2 1px, transparent 1px),
+    linear-gradient(to bottom, #eceef2 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.er-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #606266;
+  cursor: pointer;
+  user-select: none;
 }
 .er-empty {
   position: absolute;

@@ -12,13 +12,33 @@ const fkColumns = computed(() => {
   }
   return set
 })
+
+/** 只大写类型关键字前缀，括号里的枚举值保持原样 */
+function displayType(type: string): string {
+  return type.replace(/^[A-Za-z]+/, (m) => m.toUpperCase())
+}
+
+/** 悬停时测量：tooltip 伸出画布左缘则翻到元素右侧 */
+function onTipEnter(ev: Event) {
+  const host = ev.currentTarget as HTMLElement
+  const tip = host.querySelector<HTMLElement>('.er-tip')
+  if (!tip) return
+  const bounds = host.closest('.vue-flow')?.getBoundingClientRect()
+  const tipRect = tip.getBoundingClientRect()
+  const overflowLeft = tipRect.left < (bounds ? bounds.left + 4 : 4)
+  tip.classList.toggle('tip-flip', overflowLeft)
+}
 </script>
 
 <template>
   <div class="er-node">
     <Handle type="target" :position="Position.Left" />
     <Handle type="source" :position="Position.Right" />
-    <div class="er-node__header" :class="{ 'has-comment': !!data.table.comment }">
+    <div
+      class="er-node__header"
+      :class="{ 'has-comment': !!data.table.comment }"
+      @mouseenter="onTipEnter"
+    >
       <span class="er-node__header-name">{{ data.table.name }}</span>
       <span v-if="data.table.comment" class="er-tip">{{ data.table.comment }}</span>
     </div>
@@ -27,14 +47,15 @@ const fkColumns = computed(() => {
       :key="col.name"
       class="er-node__row"
       :class="{ 'has-comment': !!col.comment }"
+      @mouseenter="onTipEnter"
     >
+      <span v-if="!col.nullable" class="er-node__star">*</span>
+      <span class="er-node__name">{{ col.name }}</span>
+      <span class="er-node__type">{{ displayType(col.type) }}</span>
       <span class="er-node__tags">
         <span v-if="col.isPrimaryKey" class="tag tag--pk">PK</span>
         <span v-if="fkColumns.has(col.name)" class="tag tag--fk">FK</span>
-        <span v-if="!col.nullable" class="tag tag--nn">NN</span>
       </span>
-      <span class="er-node__name">{{ col.name }}</span>
-      <span class="er-node__type">{{ col.type }}</span>
       <span v-if="col.comment" class="er-tip">{{ col.comment }}</span>
     </div>
   </div>
@@ -80,9 +101,9 @@ const fkColumns = computed(() => {
   border-bottom: none;
 }
 .er-node__tags {
-  width: 66px;
   flex: none;
   display: flex;
+  justify-content: flex-end;
   gap: 3px;
 }
 .tag {
@@ -98,8 +119,12 @@ const fkColumns = computed(() => {
 .tag--fk {
   background: #409eff;
 }
-.tag--nn {
-  background: #909399;
+.er-node__star {
+  flex: none;
+  width: 8px;
+  color: #f56c6c;
+  font-size: 14px;
+  font-weight: 700;
 }
 .er-node__name {
   flex: 1;
@@ -115,10 +140,11 @@ const fkColumns = computed(() => {
 }
 .er-tip {
   position: absolute;
-  left: 4px;
-  bottom: calc(100% + 6px);
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 30;
-  display: none;
+  visibility: hidden;
   width: max-content;
   max-width: 260px;
   padding: 6px 10px;
@@ -134,7 +160,11 @@ const fkColumns = computed(() => {
   pointer-events: none;
 }
 .has-comment:hover .er-tip {
-  display: block;
+  visibility: visible;
+}
+.er-tip.tip-flip {
+  right: auto;
+  left: calc(100% + 8px);
 }
 .er-node :deep(.vue-flow__handle) {
   opacity: 0;
