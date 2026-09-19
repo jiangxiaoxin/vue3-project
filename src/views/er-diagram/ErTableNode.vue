@@ -137,9 +137,10 @@ function onTipEnter(ev: Event) {
 }
 .er-node__caret {
   flex: none;
-  width: 12px;
-  font-size: 10px;
-  color: #909399;
+  width: 14px;
+  font-size: 14px;
+  line-height: 1;
+  color: #606266;
 }
 .header-collapsed {
   border-bottom: none;

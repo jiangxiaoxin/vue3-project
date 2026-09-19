@@ -6,6 +6,7 @@ import '@vue-flow/core/dist/theme-default.css'
 import ErTableNode from './ErTableNode.vue'
 import { parseDdl } from './parser'
 import { layoutTables } from './layout'
+import schoolDdl from './fixtures/school-ddl.sql?raw'
 
 // 自定义节点的 props 比 vue-flow 的通用 NodeProps 更窄，注册时需断言
 const nodeTypes = { 'er-table': markRaw(ErTableNode) } as unknown as NodeTypesObject
@@ -89,6 +90,11 @@ function loadSample() {
   ddl.value = SAMPLE_DDL()
 }
 
+function loadSchoolSample() {
+  ddl.value = schoolDdl
+  onDraw()
+}
+
 function SAMPLE_DDL(): string {
   return `-- 电商示例：用户 / 订单 / 订单明细 / 商品
 CREATE TABLE \`user\` (
@@ -135,6 +141,7 @@ CREATE TABLE \`order_item\` (
         {{ drawing ? '绘制中…' : '绘制 ER 图' }}
       </button>
       <button class="btn" @click="loadSample">填充示例</button>
+      <button class="btn" @click="loadSchoolSample">学校示例</button>
       <button class="btn" @click="onClear">清空</button>
       <label class="er-toggle">
         <input v-model="showGrid" type="checkbox" />
