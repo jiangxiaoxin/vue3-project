@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { markRaw, nextTick, ref } from 'vue'
-import { VueFlow, useVueFlow, type Edge, type NodeTypesObject, type Node } from '@vue-flow/core'
+import { markRaw, nextTick, ref, watch } from 'vue'
+import { MarkerType, VueFlow, useVueFlow, type Edge, type NodeTypesObject, type Node } from '@vue-flow/core'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import ErTableNode from './ErTableNode.vue'
@@ -11,7 +11,7 @@ import { layoutTables } from './layout'
 const nodeTypes = { 'er-table': markRaw(ErTableNode) } as unknown as NodeTypesObject
 
 const FLOW_ID = 'er-diagram-flow'
-const { fitView } = useVueFlow(FLOW_ID)
+const { fitView, getSelectedNodes } = useVueFlow(FLOW_ID)
 
 const ddl = ref(SAMPLE_DDL())
 const nodes = ref<Node[]>([])
@@ -20,6 +20,33 @@ const errors = ref<string[]>([])
 const warnings = ref<string[]>([])
 const drawing = ref(false)
 const showGrid = ref(true)
+
+const EDGE_BASE_STYLE = { stroke: '#7a8aa6', strokeWidth: 1.5 }
+const EDGE_LINKED_STYLE = { stroke: '#409eff', strokeWidth: 2.5 }
+const edgeMarker = (color: string) => ({ type: MarkerType.ArrowClosed, color, width: 16, height: 16 })
+
+// 选中节点 → 高亮本节点、直连边、邻居节点；多选取并集
+watch(getSelectedNodes, (selectedNodes) => {
+  const selectedIds = new Set(selectedNodes.map((n) => n.id))
+  const neighborIds = new Set<string>()
+  const linkedEdgeIds = new Set<string>()
+  for (const e of edges.value) {
+    const linked = selectedIds.has(e.source) || selectedIds.has(e.target)
+    if (!linked) continue
+    linkedEdgeIds.add(e.id)
+    if (!selectedIds.has(e.source)) neighborIds.add(e.source)
+    if (!selectedIds.has(e.target)) neighborIds.add(e.target)
+  }
+  for (const n of nodes.value) {
+    n.class = selectedIds.has(n.id) ? 'node-selected' : neighborIds.has(n.id) ? 'node-neighbor' : ''
+  }
+  for (const e of edges.value) {
+    const linked = linkedEdgeIds.has(e.id)
+    e.class = linked ? 'edge-linked' : ''
+    e.style = linked ? EDGE_LINKED_STYLE : EDGE_BASE_STYLE
+    e.markerEnd = edgeMarker(linked ? '#409eff' : '#7a8aa6')
+  }
+})
 
 async function onDraw() {
   drawing.value = true
@@ -247,6 +274,17 @@ CREATE TABLE \`order_item\` (
     linear-gradient(to right, #eceef2 1px, transparent 1px),
     linear-gradient(to bottom, #eceef2 1px, transparent 1px);
   background-size: 20px 20px;
+}
+.er-right :deep(.vue-flow__node.node-selected) {
+  z-index: 50 !important;
+}
+.er-right :deep(.vue-flow__node.node-selected .er-node) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.25), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.er-right :deep(.vue-flow__node.node-neighbor .er-node) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 1.5px rgba(64, 158, 255, 0.45), 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 .er-toggle {
   display: flex;
