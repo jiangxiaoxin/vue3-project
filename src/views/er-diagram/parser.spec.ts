@@ -109,6 +109,18 @@ describe('parseDdl', () => {
     expect(errors).toEqual([])
   })
 
+  it('提取 DEFAULT 值：字符串、数字、NULL、函数调用', () => {
+    const { tables } = parseDdl(`CREATE TABLE d (
+      a VARCHAR(10) DEFAULT 'unpaid',
+      b DECIMAL(10,2) DEFAULT '0.00' NOT NULL,
+      c INT DEFAULT NULL,
+      d TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),
+      e INT
+    );`)
+    const cols = tables[0].columns
+    expect(cols.map((c) => c.defaultValue)).toEqual(['unpaid', '0.00', 'NULL', 'CURRENT_TIMESTAMP(6)', undefined])
+  })
+
   it('空输入得到空结果', () => {
     const { tables, errors } = parseDdl('   \n  ')
     expect(tables).toEqual([])

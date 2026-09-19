@@ -4,6 +4,7 @@ export interface ColumnDef {
   nullable: boolean
   isPrimaryKey: boolean
   comment?: string
+  defaultValue?: string
 }
 
 export interface ForeignKeyDef {
@@ -255,6 +256,10 @@ function parseColumn(item: string, errors: string[], tableName: string): ParsedC
     }
     if (up === 'COMMENT') {
       col.comment = unquoteStringLiteral(tokens[++i] ?? '')
+      continue
+    }
+    if (up === 'DEFAULT') {
+      col.defaultValue = unquoteStringLiteral(tokens[++i] ?? '')
       continue
     }
     if (up === 'REFERENCES') {

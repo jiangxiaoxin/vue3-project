@@ -75,7 +75,7 @@ function onTipEnter(ev: Event) {
       v-for="col in data.table.columns"
       :key="col.name"
       class="er-node__row"
-      :class="{ 'has-comment': !!col.comment || !!enumValues(col.type) }"
+      :class="{ 'has-comment': !!(col.comment || col.defaultValue || enumValues(col.type)) }"
       @mouseenter="onTipEnter"
     >
       <span class="er-node__star" :class="{ 'star-hidden': col.nullable }">*</span>
@@ -85,9 +85,10 @@ function onTipEnter(ev: Event) {
         <span v-if="col.isPrimaryKey" class="tag tag--pk">PK</span>
         <span v-if="fkColumns.has(col.name)" class="tag tag--fk">FK</span>
       </span>
-      <span v-if="col.comment || enumValues(col.type)" class="er-tip">
+      <span v-if="col.comment || col.defaultValue || enumValues(col.type)" class="er-tip">
         {{ col.name }}
         <template v-if="col.comment"><br />{{ col.comment }}</template>
+        <template v-if="col.defaultValue !== undefined"><br />默认值：{{ col.defaultValue }}</template>
         <template v-if="enumValues(col.type)"><br />可选值：{{ enumValues(col.type) }}</template>
       </span>
     </div>
