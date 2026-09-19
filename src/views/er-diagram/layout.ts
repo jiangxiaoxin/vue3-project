@@ -98,7 +98,7 @@ export async function layoutTables(tables: TableDef[], byIdMap: Map<string, Tabl
       source: sourceTable,
       target: rest.replace(/\(.*\)$/, '').trim(),
       label: decodeFkLabel(edge.id, byIdMap),
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#7a8aa6', width: 16, height: 16 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#7a8aa6', width: 24, height: 24, markerUnits: 'userSpaceOnUse' },
       style: { stroke: '#7a8aa6', strokeWidth: 1.5 }
     }
   })

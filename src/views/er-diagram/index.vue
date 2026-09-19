@@ -24,7 +24,14 @@ const showGrid = ref(true)
 
 const EDGE_BASE_STYLE = { stroke: '#7a8aa6', strokeWidth: 1.5 }
 const EDGE_LINKED_STYLE = { stroke: '#409eff', strokeWidth: 2.5 }
-const edgeMarker = (color: string) => ({ type: MarkerType.ArrowClosed, color, width: 16, height: 16 })
+// markerUnits 默认随线宽缩放，高亮加粗时箭头会变大；固定为 userSpaceOnUse 只变颜色
+const edgeMarker = (color: string) => ({
+  type: MarkerType.ArrowClosed,
+  color,
+  width: 24,
+  height: 24,
+  markerUnits: 'userSpaceOnUse'
+})
 
 // 选中节点 → 高亮本节点、直连边、邻居节点；多选取并集
 watch(getSelectedNodes, (selectedNodes) => {
