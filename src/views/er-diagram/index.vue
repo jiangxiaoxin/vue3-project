@@ -7,6 +7,7 @@ import ErTableNode from './ErTableNode.vue'
 import { parseDdl } from './parser'
 import { layoutTables } from './layout'
 import schoolDdl from './fixtures/school-ddl.sql?raw'
+import { generateDdl } from './fixtures/genDdl'
 
 // 自定义节点的 props 比 vue-flow 的通用 NodeProps 更窄，注册时需断言
 const nodeTypes = { 'er-table': markRaw(ErTableNode) } as unknown as NodeTypesObject
@@ -20,6 +21,7 @@ const edges = ref<Edge[]>([])
 const errors = ref<string[]>([])
 const warnings = ref<string[]>([])
 const drawing = ref(false)
+const perfMsg = ref('')
 const showGrid = ref(true)
 
 const EDGE_BASE_STYLE = { stroke: '#7a8aa6', strokeWidth: 1.5 }
@@ -58,6 +60,7 @@ watch(getSelectedNodes, (selectedNodes) => {
 
 async function onDraw() {
   drawing.value = true
+  perfMsg.value = ''
   errors.value = []
   warnings.value = []
   try {
@@ -91,6 +94,7 @@ function onClear() {
   edges.value = []
   errors.value = []
   warnings.value = []
+  perfMsg.value = ''
 }
 
 function loadSample() {
@@ -100,6 +104,16 @@ function loadSample() {
 function loadSchoolSample() {
   ddl.value = schoolDdl
   onDraw()
+}
+
+/** 一键载入 200 表 × 20 字段的生成 DDL 并绘制，实测页面级渲染耗时 */
+async function loadPerfSample() {
+  ddl.value = generateDdl(200, 20)
+  const start = performance.now()
+  await onDraw()
+  // onDraw 里的 nextTick 已等待节点 DOM 挂载完成，此处耗时 ≈ 解析 + ELK 布局 + 渲染
+  const ms = Math.round(performance.now() - start)
+  perfMsg.value = `压测：${nodes.value.length} 张表 / ${edges.value.length} 条边，绘制总耗时 ${ms}ms`
 }
 
 function SAMPLE_DDL(): string {
@@ -149,6 +163,7 @@ CREATE TABLE \`order_item\` (
       </button>
       <button class="btn" @click="loadSample">填充示例</button>
       <button class="btn" @click="loadSchoolSample">学校示例</button>
+      <button class="btn" :disabled="drawing" @click="loadPerfSample">性能压测</button>
       <button class="btn" @click="onClear">清空</button>
       <label class="er-toggle">
         <input v-model="showGrid" type="checkbox" />
@@ -157,12 +172,15 @@ CREATE TABLE \`order_item\` (
       <span class="er-toolbar__hint">左侧粘贴 MySQL DDL，点击绘制</span>
     </div>
 
-    <div v-if="errors.length || warnings.length" class="er-messages">
+    <div v-if="errors.length || warnings.length || perfMsg" class="er-messages">
       <ul v-if="errors.length" class="msg msg--error">
         <li v-for="(e, i) in errors" :key="'e' + i">{{ e }}</li>
       </ul>
       <ul v-if="warnings.length" class="msg msg--warn">
         <li v-for="(w, i) in warnings" :key="'w' + i">{{ w }}</li>
+      </ul>
+      <ul v-if="perfMsg" class="msg msg--info">
+        <li>{{ perfMsg }}</li>
       </ul>
     </div>
 
@@ -255,6 +273,9 @@ CREATE TABLE \`order_item\` (
 }
 .msg--warn {
   color: #e6a23c;
+}
+.msg--info {
+  color: #67c23a;
 }
 .er-body {
   flex: 1;
