@@ -51,6 +51,8 @@ function processDataLine(
   // `data:` 之后允许有一个可选空格；trimStart 兼容 `data:{...}` 与 `data: {...}`。
   const data = normalizedLine.slice(5).trimStart()
 
+  debugger
+
   if (data === '[DONE]') {
     console.log('[openai][stream] received [DONE]')
     return true
@@ -74,7 +76,7 @@ function processDataLine(
 
   // 只转发非空字符串；role-only 或 content 为 null 的事件不触发 UI 更新。
   if (typeof content === 'string' && content.length > 0) {
-    console.log('[openai][stream] delta content', content)
+    // console.log('[openai][stream] delta content', content)
     onDelta(content)
   }
 

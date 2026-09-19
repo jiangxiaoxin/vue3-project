@@ -18,7 +18,7 @@ import { parseOpenAIStream } from '@/utils/parseOpenAIStream'
  * 由 `streamChat` 在每次请求时自动前置，不进入页面消息列表。
  */
 export const FORMULA_SYSTEM_PROMPT =
-  '如果内容涉及到数学公式，化学公式，物理公式等科学公式类内容，请对相关内容按照严格的 latex 科学论文编写所要求的公式格式返回内容'
+  '你是一位精通数学，物理，化学等理科知识的老师。你很乐意帮助学生解决学习中遇到的问题，并细致准确地解答学生遇到的问题。所回答的内容，如果涉及到数学公式，化学公式，物理公式等科学公式类内容，会对相关内容按照严格的 latex 科学论文编写所要求的公式格式返回内容。'
 
 /** 发往 chat.completions 的消息结构（不含页面 UI 专用字段）。 */
 export interface ChatRequestMessage {
@@ -113,14 +113,14 @@ export async function streamChat({
     ...messages
   ]
 
-  // 调试日志不得打印 apiKey。
-  console.log('[openai][request] start', {
-    url,
-    messageCount: requestMessages.length,
-    model: 'gpt-5.5',
-    stream: true,
-    hasSystemPrompt: true
-  })
+  // // 调试日志不得打印 apiKey。
+  // console.log('[openai][request] start', {
+  //   url,
+  //   messageCount: requestMessages.length,
+  //   model: 'gpt-5.5',
+  //   stream: true,
+  //   hasSystemPrompt: true
+  // })
 
   const response = await fetchImpl(url, {
     method: 'POST',

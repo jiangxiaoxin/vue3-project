@@ -43,7 +43,12 @@
     </header>
 
     <!-- 中部：动态消息列表；aria-live 便于读屏感知流式更新 -->
-    <section ref="messageList" class="message-list" aria-live="polite">
+    <section
+      ref="messageList"
+      class="message-list"
+      aria-live="polite"
+      @scroll="onMessageListScroll"
+    >
       <div v-if="messages.length === 0" class="empty-state">
         <span>01</span>
         <h2>等待第一条消息</h2>
@@ -78,6 +83,27 @@
           {{ message.content }}
         </p>
         <p v-else class="message-placeholder">正在连接模型…</p>
+        <div
+          v-if="message.role === 'assistant' && message.status !== 'streaming'"
+          class="message-actions"
+        >
+          <button
+            type="button"
+            class="message-action-button message-action-button--confirm"
+            data-testid="assistant-confirm"
+            @click="onAssistantConfirm(message)"
+          >
+            确定
+          </button>
+          <button
+            type="button"
+            class="message-action-button message-action-button--cancel"
+            data-testid="assistant-cancel"
+            @click="onAssistantCancel(message)"
+          >
+            取消
+          </button>
+        </div>
       </article>
     </section>
 
@@ -211,6 +237,15 @@ const messageList = ref<HTMLElement>()
 let activeController: AbortController | undefined
 /** 递增以作废进行中的历史恢复，避免卸载后的异步结果回写消息列表。 */
 let historyLoadToken = 0
+/**
+ * 流式输出时是否跟随滚到底部。
+ * 用户主动上滚后置为 false，交还滚动控制权；滚回底部附近再恢复跟随。
+ */
+let stickToBottom = true
+/** 判定「已在底部」的像素容差，避免亚像素/布局抖动误判。 */
+const SCROLL_BOTTOM_THRESHOLD_PX = 64
+/** 程序化滚底时忽略 scroll 事件，避免把自动滚动当成用户上滚。 */
+let ignoreScrollEvent = false
 
 /** 创建一条带本地唯一 id 的消息对象。 */
 function createMessage(
@@ -301,7 +336,7 @@ async function restoreLocalHistory() {
       count: messages.value.length
     })
     if (messages.value.length > 0) {
-      await scrollToBottom()
+      await scrollToBottom(true)
     }
   } catch (error) {
     if (loadToken !== historyLoadToken) {
@@ -331,12 +366,50 @@ async function clearLocalHistory() {
   }
 }
 
-/** 等 DOM 更新后把消息列表滚到最底部，保证流式输出可见。 */
-async function scrollToBottom() {
+/** 判断消息列表是否已贴近底部。 */
+function isNearBottom(el: HTMLElement): boolean {
+  return (
+    el.scrollHeight - el.scrollTop - el.clientHeight <= SCROLL_BOTTOM_THRESHOLD_PX
+  )
+}
+
+/** 用户滚动时更新跟随策略：离底则停止自动贴底，回到底部再恢复。 */
+function onMessageListScroll() {
+  if (ignoreScrollEvent) {
+    return
+  }
+
+  const el = messageList.value
+  if (!el) {
+    return
+  }
+
+  stickToBottom = isNearBottom(el)
+}
+
+/**
+ * 将消息列表滚到底部。
+ * @param force 提交/恢复历史等场景强制贴底并重新开启跟随；流式增量仅在 stickToBottom 时滚动。
+ */
+async function scrollToBottom(force = false) {
+  if (!force && !stickToBottom) {
+    return
+  }
+
+  if (force) {
+    stickToBottom = true
+  }
+
   await nextTick()
-  messageList.value?.scrollTo?.({
-    top: messageList.value.scrollHeight,
-    behavior: 'smooth'
+  const el = messageList.value
+  if (!el) {
+    return
+  }
+
+  ignoreScrollEvent = true
+  el.scrollTop = el.scrollHeight
+  requestAnimationFrame(() => {
+    ignoreScrollEvent = false
   })
 }
 
@@ -407,8 +480,22 @@ function stopStream() {
     return
   }
 
-  console.log('[openai][page] stop stream requested')
+  // console.log('[openai][page] stop stream requested')
+
+  // 在创建一次请求时，这里用的是fetch，会给fetch 传递一个signal，这个signal 就是用这里记录的activeController 生成的，只要主动的调用 controller 的abort 方法，就会自动的终止掉fetch 继续接收数据，请求就被用户自己主动断开了
   activeController.abort()
+}
+
+/** AI 回复「确定」：仅做简单提示。 */
+function onAssistantConfirm(message: ViewMessage) {
+  console.log('[openai][page] assistant confirm', { id: message.id })
+  window.alert('已确定')
+}
+
+/** AI 回复「取消」：仅做简单提示。 */
+function onAssistantCancel(message: ViewMessage) {
+  console.log('[openai][page] assistant cancel', { id: message.id })
+  window.alert('已取消')
 }
 
 /**
@@ -458,7 +545,7 @@ async function submit() {
   isLoading.value = true
   const controller = new AbortController()
   activeController = controller
-  await scrollToBottom()
+  await scrollToBottom(true)
 
   try {
     await streamChat({
@@ -674,6 +761,38 @@ onBeforeUnmount(() => {
 
 .message-placeholder {
   color: rgba(23, 34, 29, 0.5);
+}
+
+.message-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.message-action-button {
+  min-width: 72px;
+  border: 1px solid var(--ink);
+  padding: 8px 14px;
+  font: 700 12px/1 monospace;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 rgba(23, 34, 29, 0.12);
+}
+
+.message-action-button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(23, 34, 29, 0.16);
+}
+
+.message-action-button--confirm {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.message-action-button--cancel {
+  background: transparent;
 }
 
 .markdown-body :deep(> :first-child) {

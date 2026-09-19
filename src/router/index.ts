@@ -362,6 +362,11 @@ export const config = [
     path: '/openai',
     name: 'openai',
     component: () => import('@/views/openai/index.vue')
+  },
+  {
+    path: '/aidocx',
+    name: 'aidocx',
+    component: () => import('@/views/aidocx/index.vue')
   }
   // {
   //   path: '/leetcode',

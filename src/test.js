@@ -1,3 +1,17 @@
+function a() {
+  throw "哈哈，错了吧"
+}
+
+try {
+  a()
+} catch (error) {
+  console.log('🚀 ~ error:', error)
+}
+
+return
+
+
+
 // 笛卡尔积
 // 给定组成元素，计算全排列组合
 function multiMulti() {

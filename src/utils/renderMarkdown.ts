@@ -155,7 +155,7 @@ export function renderMarkdown(markdown: string): string {
   const normalized = normalizeMathDelimiters(markdown)
 
   if (normalized !== markdown) {
-    console.log('[openai][markdown] normalized math delimiters')
+    // console.log('[openai][markdown] normalized math delimiters')
   }
 
   // marked.parse 在 async:false 时同步返回 string；显式断言避免 Promise 联合类型干扰调用方。
