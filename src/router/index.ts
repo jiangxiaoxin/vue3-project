@@ -367,6 +367,12 @@ export const config = [
     path: '/aidocx',
     name: 'aidocx',
     component: () => import('@/views/aidocx/index.vue')
+  },
+  {
+    // MySQL DDL → ER 图（elkjs 布局 + vue-flow 渲染）
+    path: '/er-diagram',
+    name: 'er-diagram',
+    component: () => import('@/views/er-diagram/index.vue')
   }
   // {
   //   path: '/leetcode',
