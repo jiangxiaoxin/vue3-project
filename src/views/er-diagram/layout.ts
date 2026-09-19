@@ -83,7 +83,8 @@ export async function layoutTables(tables: TableDef[], byIdMap: Map<string, Tabl
       id: child.id,
       type: 'er-table',
       position: { x: child.x, y: child.y },
-      style: { width: NODE_WIDTH, height: tableNodeHeight(table) },
+      // 不设固定 height：卡片高度由内容自适应，节点收起时 vue-flow 重新测量、连线锚点跟随
+      style: { width: NODE_WIDTH },
       data: { table }
     }
   })

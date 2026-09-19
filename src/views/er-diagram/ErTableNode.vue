@@ -1,9 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { TableDef } from './parser'
 
 const props = defineProps<{ data: { table: TableDef } }>()
+
+const collapsed = ref(false)
+let headerDownPos: { x: number; y: number } | null = null
+
+// 表头同时是拖拽起点，拖动过的 click 不算「点击收起」
+function onHeaderDown(ev: MouseEvent) {
+  headerDownPos = { x: ev.clientX, y: ev.clientY }
+}
+function onHeaderClick(ev: MouseEvent) {
+  if (headerDownPos && Math.hypot(ev.clientX - headerDownPos.x, ev.clientY - headerDownPos.y) > 3) return
+  collapsed.value = !collapsed.value
+}
 
 const fkColumns = computed(() => {
   const set = new Set<string>()
@@ -65,14 +77,17 @@ function onTipEnter(ev: Event) {
     <Handle type="source" :position="Position.Right" />
     <div
       class="er-node__header"
-      :class="{ 'has-comment': !!data.table.comment }"
+      :class="{ 'has-comment': !!data.table.comment, 'header-collapsed': collapsed }"
       @mouseenter="onTipEnter"
+      @mousedown="onHeaderDown"
+      @click="onHeaderClick"
     >
+      <span class="er-node__caret">{{ collapsed ? '▸' : '▾' }}</span>
       <span class="er-node__header-name">{{ data.table.name }}</span>
       <span v-if="data.table.comment" class="er-tip">{{ data.table.comment }}</span>
     </div>
     <div
-      v-for="col in data.table.columns"
+      v-for="col in collapsed ? [] : data.table.columns"
       :key="col.name"
       class="er-node__row"
       :class="{ 'has-comment': !!(col.comment || col.defaultValue || enumValues(col.type)) }"
@@ -109,14 +124,29 @@ function onTipEnter(ev: Event) {
   height: 36px;
   line-height: 36px;
   padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
   font-weight: 600;
   background: #eef2fb;
   border-bottom: 1px solid #c9cdd6;
   border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  user-select: none;
+}
+.er-node__caret {
+  flex: none;
+  width: 12px;
+  font-size: 10px;
+  color: #909399;
+}
+.header-collapsed {
+  border-bottom: none;
+  border-radius: 5px;
 }
 .er-node__header-name {
-  display: block;
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
