@@ -18,6 +18,35 @@ function displayType(type: string): string {
   return type.replace(/^[A-Za-z]+/, (m) => m.toUpperCase())
 }
 
+/** ENUM/SET 只展示类型名，具体取值挪进 tooltip */
+function typeKeyword(type: string): string {
+  const m = /^(enum|set)\b/i.exec(type)
+  return m ? m[1].toUpperCase() : displayType(type)
+}
+
+function enumValues(type: string): string | null {
+  const m = /^(?:enum|set)\((.*)\)$/i.exec(type)
+  if (!m) return null
+  const values: string[] = []
+  let cur = ''
+  let inQuote = false
+  const push = () => values.push(inQuote ? cur.replace(/''/g, "'") : cur.trim())
+  for (const ch of m[1]) {
+    if (ch === "'") {
+      inQuote = !inQuote
+      continue
+    }
+    if (ch === ',' && !inQuote) {
+      push()
+      cur = ''
+      continue
+    }
+    cur += ch
+  }
+  push()
+  return values.join('、')
+}
+
 /** 悬停时测量：tooltip 伸出画布左缘则翻到元素右侧 */
 function onTipEnter(ev: Event) {
   const host = ev.currentTarget as HTMLElement
@@ -46,17 +75,21 @@ function onTipEnter(ev: Event) {
       v-for="col in data.table.columns"
       :key="col.name"
       class="er-node__row"
-      :class="{ 'has-comment': !!col.comment }"
+      :class="{ 'has-comment': !!col.comment || !!enumValues(col.type) }"
       @mouseenter="onTipEnter"
     >
-      <span v-if="!col.nullable" class="er-node__star">*</span>
+      <span class="er-node__star" :class="{ 'star-hidden': col.nullable }">*</span>
       <span class="er-node__name">{{ col.name }}</span>
-      <span class="er-node__type">{{ displayType(col.type) }}</span>
+      <span class="er-node__type">{{ typeKeyword(col.type) }}</span>
       <span class="er-node__tags">
         <span v-if="col.isPrimaryKey" class="tag tag--pk">PK</span>
         <span v-if="fkColumns.has(col.name)" class="tag tag--fk">FK</span>
       </span>
-      <span v-if="col.comment" class="er-tip">{{ col.comment }}</span>
+      <span v-if="col.comment || enumValues(col.type)" class="er-tip">
+        {{ col.name }}
+        <template v-if="col.comment"><br />{{ col.comment }}</template>
+        <template v-if="enumValues(col.type)"><br />可选值：{{ enumValues(col.type) }}</template>
+      </span>
     </div>
   </div>
 </template>
@@ -126,12 +159,15 @@ function onTipEnter(ev: Event) {
   font-size: 14px;
   font-weight: 700;
 }
+.star-hidden {
+  visibility: hidden;
+}
 .er-node__name {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 .er-node__type {
+  flex: none;
   color: #909399;
 }
 .has-comment {
@@ -146,6 +182,7 @@ function onTipEnter(ev: Event) {
   z-index: 30;
   visibility: hidden;
   width: max-content;
+  min-width: 160px;
   max-width: 260px;
   padding: 6px 10px;
   font-size: 12px;
@@ -169,5 +206,11 @@ function onTipEnter(ev: Event) {
 .er-node :deep(.vue-flow__handle) {
   opacity: 0;
   pointer-events: none;
+}
+/* vue-flow 给每个节点卡片设了行内 z-index，tooltip 再高也出不了本卡片的层；
+   悬停行时抬升整张卡片，让它盖住相邻节点。tooltip 是 pointer-events:none 无法被 :hover，
+   所以以带注释的行/表头为悬停对象。卡片是行的祖先，scoped 选择器够不到，须用 :global */
+:global(.vue-flow__node:has(.has-comment:hover)) {
+  z-index: 1000 !important;
 }
 </style>

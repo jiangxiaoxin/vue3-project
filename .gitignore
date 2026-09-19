@@ -32,5 +32,6 @@ playwright-report/
 
 .temp
 .cache
+*.tsbuildinfo
 
 /docs/.vuepress/*
