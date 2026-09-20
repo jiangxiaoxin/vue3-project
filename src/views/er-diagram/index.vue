@@ -220,7 +220,7 @@ CREATE TABLE \`order_item\` (
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .er-page {
   display: flex;
   flex-direction: column;
@@ -233,7 +233,7 @@ CREATE TABLE \`order_item\` (
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid red; // #e5e6eb;
   background: #fafbfc;
 }
 .er-toolbar__hint {
@@ -318,11 +318,13 @@ CREATE TABLE \`order_item\` (
     linear-gradient(to right, #eceef2 1px, transparent 1px),
     linear-gradient(to bottom, #eceef2 1px, transparent 1px);
   background-size: 20px 20px;
+  background-repeat: space;
 }
 .er-right.bg-dots :deep(.vue-flow) {
   background-image: radial-gradient(circle, #c9cdd6 1.2px, transparent 1.2px);
   background-size: 20px 20px;
-  background-position: 10px 10px;
+  // background-position: 10px 10px;
+  background-repeat: space; // 截断最后一次repeat，然后平分空间，显示更好
 }
 .er-right :deep(.vue-flow__node.node-selected) {
   z-index: 50 !important;
