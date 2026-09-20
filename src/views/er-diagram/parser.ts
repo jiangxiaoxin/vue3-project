@@ -30,49 +30,81 @@ type ParsedColumn = ColumnDef & { _ref?: { refTable: string; refColumn: string }
 type QuoteChar = "'" | '"' | '`'
 
 /**
- * 去除 --/# 行注释与 /* *\/ 块注释；处于引号内时不识别注释符。
+ * 去除 SQL 中的行注释（-- 与 #）和块注释（/* *\/），返回清洗后的文本。
+ * [这里展示了块注释里不能嵌套块注释：上面为了写明白 /* 开始和对应的结束，特意在 / 起那么加了转义字符，不加就已经认定在这里结束注释了]
+ * 采用单趟字符扫描 + 引号状态机：一旦进入 ' " ` 就原样输出内容，
+ * 因此 COMMENT 'a -- b' 这类字符串里的注释符不会被误删。
+ *
+ * @param input 原始 DDL 文本
+ * @returns 去注释后的文本。块注释整体替换为一个空格（保留分词边界），行注释保留换行符位置
  */
 function stripSqlComments(input: string): string {
   let out = ''
+  // 当前所处的引号字符；null 表示不在字符串/标识符内部
   let quote: QuoteChar | null = null
   let i = 0
   while (i < input.length) {
     const ch = input[i]
+
+    // —— 分支一：处于引号内，内容一律原样保留，不识别任何注释符 ——
     if (quote) {
       out += ch
+      // 反斜杠转义：把被转义的下一个字符一并吃掉（反引号标识符不支持转义，故排除）
       if (ch === '\\' && quote !== '`') {
         i += 2
         if (i < input.length) out += input[i - 1]
         continue
       }
       if (ch === quote) {
+        // SQL 里连续两个相同引号表示转义成一个字面引号（'' → '），不能当作闭合
         if (input[i + 1] === quote) {
           out += input[i + 1]
           i += 2
           continue
         }
-        quote = null
+        quote = null // 真正的闭合，退出引号状态
       }
       i++
       continue
     }
+
+    // —— 分支二：遇到引号，进入引号状态 ——
     if (ch === "'" || ch === '"' || ch === '`') {
       quote = ch
       out += ch
       i++
       continue
     }
+
+    // —— 分支三：块注释 /* ... */ ——
     if (ch === '/' && input[i + 1] === '*') {
+      // 补一个空格而非直接删除，避免 a/*x*/b 被粘连成 ab 导致分词错误
       const end = input.indexOf('*/', i + 2)
+      // 找不到结束符（未闭合注释）则丢弃到末尾
       i = end === -1 ? input.length : end + 2
       out += ' '
       continue
     }
+
+    /**
+     * 如果是 # 开头就认为后面都是注释
+     * 如果是 - 开头，就继续判断后面是不是 --，再看第3个字符。
+     * 如果第3个有，且是空白，这就是注释，
+     * 如果有第3个但不是空白，那--整体不是注释。第1个 - 字符就会走入分支五，仅需加到output上
+     * 如果没有第3个字符，那还是把这里当注释看，走进if了
+     * 但这里直接就[i+1] [i+2]是很可能触发越界的，只是不报错而已,如果用其他语言来写这个解析，就可能会报错了
+     */
+
+    // —— 分支四：行注释 # 或 -- ——
+    // MySQL 规定 -- 后必须紧跟空白符（或到行尾）才算注释，否则是减号，如 a--1
     if (ch === '#' || (ch === '-' && input[i + 1] === '-' && (/\s/.test(input[i + 2] ?? '') || i + 2 >= input.length))) {
+      // i 停在 \n 上，换行符交给下一轮当普通字符输出，保持行结构
       const end = input.indexOf('\n', i)
       i = end === -1 ? input.length : end
       continue
     }
+
+    // —— 分支五：普通字符，直接输出 ——
     out += ch
     i++
   }
